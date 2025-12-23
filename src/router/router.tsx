@@ -31,7 +31,7 @@ const routerConfig = [
 const router = isGitHubPages
   ? createHashRouter(routerConfig)
   : createBrowserRouter(routerConfig, {
-      basename: import.meta.env.PROD ? '/schedule-frontend/' : '/',
+      basename: import.meta.env.PROD ? '/crm-frontend/' : '/',
     });
 
 export default router;
