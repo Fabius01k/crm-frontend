@@ -3,7 +3,6 @@ import { adminNavMenuItems } from "../info"
 import { useState } from "react"
 
 import menuArrowRight from "@assets/icons/menu/menu-arrow-right.svg"
-import menuArrowLeft from "@assets/icons/menu/menu-arrow-left.svg"
 
 import "./desktop-nav-menu.scss"
 
@@ -47,16 +46,12 @@ export const DesktopMenu = () => {
           className="desktop-nav-menu__toggle"
           onClick={toggleMenu}
         >
-          <div className="menuItemRow">
-            <div className="menuItemIcon">
-              <img
-                alt={isOpen ? "Закрыть меню" : "Открыть меню"}
-                src={isOpen ? menuArrowLeft : menuArrowRight}
-              />
-            </div>
-            <div className={`menuItemtext ${isOpen ? 'menuItemtext--visible' : ''}`}>
-              {isOpen ? "Свернуть" : "Развернуть"}
-            </div>
+          <div className="menuItemIcon">
+            <img
+              alt={isOpen ? "Закрыть меню" : "Открыть меню"}
+              src={menuArrowRight}
+              className={isOpen ? "desktop-nav-menu__toggle-icon--rotated" : ""}
+            />
           </div>
         </button>
       </nav>

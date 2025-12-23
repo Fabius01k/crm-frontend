@@ -3,6 +3,7 @@
   flex-direction: column;
   background-color: #F0F4F7;
   width: auto;
+  box-sizing: border-box;
   height: calc(100vh - 200px); /* Минус высота header и footer */
   position: fixed;
   left: 0;
@@ -32,22 +33,39 @@
 
   &__toggle {
     background: transparent;
+    outline: none;
     border: none;
     cursor: pointer;
     padding: 0.5rem;
-    margin-top: auto;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin: -5px 0 0 0;
     transition: all 0.2s ease;
     width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     &:hover {
       background-color: rgba(100, 108, 255, 0.1);
     }
 
-    .menuItemRow {
-      .menuItemtext {
-        color: #646cff;
-        font-weight: 600;
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    .menuItemIcon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      
+      img {
+        width: 32px;
+        height: 32px;
+        transition: transform 0.3s ease;
+        
+        &.desktop-nav-menu__toggle-icon--rotated {
+          transform: rotate(180deg);
+        }
       }
     }
   }
@@ -131,13 +149,4 @@
       width: auto;
     }
   }
-}
-
-/* Анимация для стрелки при переключении */
-.desktop-nav-menu__toggle .menuItemIcon img {
-  transition: transform 0.3s ease;
-}
-
-.desktop-nav-menu--open .desktop-nav-menu__toggle .menuItemIcon img {
-  transform: rotate(180deg);
 }
