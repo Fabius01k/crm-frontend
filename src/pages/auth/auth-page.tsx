@@ -13,7 +13,7 @@ const AuthPage = () => {
 
     const [email, setEmail] = React.useState("")
     const [password, setPassword] = React.useState("")
-    const [rememberMe, setRememberMe] = React.useState(true)
+    // const [rememberMe, setRememberMe] = React.useState(true)
 
     const isFormFilled = email.trim() !== "" && password.trim() !== ""
     const hasServerError = error !== null
@@ -86,7 +86,7 @@ const AuthPage = () => {
                 </div>
                 
                 {/* Checkbox Remember me */}
-                <div className={styles.rememberMe}>
+                {/* <div className={styles.rememberMe}>
                     <input
                         type="checkbox"
                         id="rememberMe"
@@ -95,7 +95,7 @@ const AuthPage = () => {
                         disabled={loading}
                     />
                     <label htmlFor="rememberMe">Remember me</label>
-                </div>
+                </div> */}
                 
                 <button
                     type="submit"

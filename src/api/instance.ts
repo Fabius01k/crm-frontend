@@ -5,13 +5,13 @@ import { authAPI } from "@store/features/auth-slice/auth-api";
 import { PATHS } from "@router/paths";
 
 export const instance = axios.create({
-    baseURL: import.meta.env.VITE_APP_BASE_URL || "http://127.0.0.1:3001",
+    baseURL: import.meta.env.VITE_APP_BASE_URL || "http://127.0.0.1:3000",
     withCredentials: true,
 });
 
 // Отдельный instance для refresh запросов (без интерцепторов)
 export const refreshInstance = axios.create({
-    baseURL: import.meta.env.VITE_APP_BASE_URL || "http://127.0.0.1:3001",
+    baseURL: import.meta.env.VITE_APP_BASE_URL || "http://127.0.0.1:3000",
     withCredentials: true,
 });
 
