@@ -1,0 +1,143 @@
+.desktop-nav-menu {
+  display: flex;
+  flex-direction: column;
+  background-color: #F0F4F7;
+  width: auto;
+  height: calc(100vh - 200px); /* Минус высота header и footer */
+  position: fixed;
+  left: 0;
+  top: 100px; /* Высота header */
+  z-index: 999; /* Ниже header (1000) и footer (1000) */
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: width 0.3s ease;
+  overflow: hidden;
+  padding: 0.5rem 0;
+
+  // &--open {
+  //   width: 220px;
+  // }
+
+  &:not(.desktop-nav-menu--open) {
+    width: 70px;
+  }
+
+  &__items {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    overflow-y: auto;
+    padding: 0 0.5rem;
+  }
+
+  &__toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-top: auto;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    width: 100%;
+
+    &:hover {
+      background-color: rgba(100, 108, 255, 0.1);
+    }
+
+    .menuItemRow {
+      .menuItemtext {
+        color: #646cff;
+        font-weight: 600;
+      }
+    }
+  }
+
+  &__item {
+    position: relative;
+  }
+
+  &__link {
+    color: black;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 16px;
+    line-height: 100%;
+    text-decoration: none;
+    padding: 0.5rem;
+    transition: all 0.2s ease;
+    position: relative;
+    display: block;
+    border-radius: 6px;
+
+    &:hover {
+      color: #646cff;
+      background-color: rgba(100, 108, 255, 0.1);
+    }
+
+    &--active {
+      color: #646cff;
+      background-color: rgba(100, 108, 255, 0.1);
+    }
+  }
+
+  @media (prefers-color-scheme: light) {
+    .desktop-nav-menu__link {
+      color: #213547;
+
+      &:hover {
+        color: #747bff;
+        background-color: rgba(116, 123, 255, 0.1);
+      }
+
+      &--active {
+        color: #747bff;
+        background-color: rgba(116, 123, 255, 0.1);
+      }
+    }
+  }
+}
+
+
+.menuItemRow {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 8px;
+  min-height: 40px;
+
+  .menuItemIcon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    img {
+      width: 32px;
+      height: 32px;
+      transition: transform 0.2s ease;
+    }
+  }
+
+  .menuItemtext {
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease, width 0.3s ease;
+    white-space: nowrap;
+
+    &--visible {
+      opacity: 1;
+      width: auto;
+    }
+  }
+}
+
+/* Анимация для стрелки при переключении */
+.desktop-nav-menu__toggle .menuItemIcon img {
+  transition: transform 0.3s ease;
+}
+
+.desktop-nav-menu--open .desktop-nav-menu__toggle .menuItemIcon img {
+  transform: rotate(180deg);
+}
