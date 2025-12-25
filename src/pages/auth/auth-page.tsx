@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "@store/store"
 import { authThunks } from "@store/features/auth-slice/auth-thunks"
 import { authSliceActions } from "@store/features/auth-slice/auth-slice"
-import authImage from "@assets/images/auth/auth-image.svg"
+import authImage from "@assets/images/auth/auth-image-2.png"
+import PasswordInput from "@components/PasswordInput"
 
 import styles from "./auth-page.module.scss"
 
@@ -34,13 +35,15 @@ const AuthPage = () => {
 
     // Определяем класс кнопки на основе состояния
     const getButtonClassName = () => {
+        let stateClass = ''
         if (hasServerError) {
-            return `${styles.buttonError}`
+            stateClass = styles.buttonError
+        } else if (isFormFilled) {
+            stateClass = styles.buttonFilled
+        } else {
+            stateClass = styles.buttonNormal // Базовый стиль (пустые поля)
         }
-        if (isFormFilled) {
-            return `${styles.buttonFilled}`
-        }
-        return '' // Базовый стиль (пустые поля)
+        return `${styles.loginButton} ${stateClass}`
     }
 
     const getButtonText = () => {
@@ -70,18 +73,17 @@ const AuthPage = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={loading}
                         required
-                        placeholder="Введите email"
+                        // placeholder="Введите email"
                     />
                 </div>
                 <div className={styles.field}>
                     <label>Password:</label>
-                    <input
-                        type="password"
+                    <PasswordInput
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         disabled={loading}
                         required
-                        placeholder="Введите пароль"
+                        // placeholder="Введите пароль"
                     />
                 </div>
                 
