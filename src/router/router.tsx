@@ -2,6 +2,7 @@ import { createHashRouter, createBrowserRouter, Navigate } from "react-router";
 import { PATHS } from "@router/paths";
 import AuthPage from "@pages/auth/auth-page";
 import { UsersPage } from "@/pages/users/users-page";
+import { ProfilePage } from "@/pages/profile/profile-page";
 import { Layout } from "@/pages/layout/layout";
 
 // Для GitHub Pages используем HashRouter, чтобы избежать проблем с 404
@@ -23,6 +24,10 @@ const routerConfig = [
       {
         path: PATHS.users,
         element: <UsersPage />
+      },
+      {
+        path: PATHS.profile,
+        element: <ProfilePage />
       },
     ]
   },

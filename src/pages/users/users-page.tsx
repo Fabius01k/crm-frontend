@@ -23,13 +23,19 @@ interface FilterState {
 
 export const UsersPage = () => {
     const allUsers: User[] = [
-        { id: 1, fullName: 'Алексей Иванов', department: 'Support', position: 'Менеджер', grade: 'Junior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
-        { id: 2, fullName: 'Ольга Смирнова', department: 'Support', position: 'Менеджер', grade: 'Middle', scheduleType: 'Сменный', shiftType: 'Любая' },
-        { id: 3, fullName: 'Даниил Петров', department: 'Sales', position: 'Менеджер', grade: 'Junior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
-        { id: 4, fullName: 'Елена Козлова', department: 'Sales', position: 'Потичск', grade: 'Middle', scheduleType: 'Стандартный', shiftType: 'Дневная' },
-        { id: 5, fullName: 'Сергей Сидоров', department: 'Support', position: 'Менеджер', grade: 'Senior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
-        { id: 6, fullName: 'Анна Михайлова', department: 'Support', position: 'Менеджер', grade: 'Senior', scheduleType: 'Сменный', shiftType: 'Ночная' },
-        { id: 7, fullName: 'Иван Орлов', department: 'Sales', position: 'Менеджер', grade: 'Senior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
+        // IT отдел
+        { id: 1, fullName: 'Алексей Иванов', department: 'IT', position: 'Фронт разработчик', grade: 'Junior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
+        { id: 2, fullName: 'Ольга Смирнова', department: 'IT', position: 'Бек разработчик', grade: 'Middle', scheduleType: 'Сменный', shiftType: 'Любая' },
+        { id: 3, fullName: 'Даниил Петров', department: 'IT', position: 'Фул стак', grade: 'Senior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
+        { id: 4, fullName: 'Елена Козлова', department: 'IT', position: 'Фронт разработчик', grade: 'Middle', scheduleType: 'Стандартный', shiftType: 'Дневная' },
+        // Support отдел
+        { id: 5, fullName: 'Сергей Сидоров', department: 'Support', position: 'Старший саппорт', grade: 'Senior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
+        { id: 6, fullName: 'Анна Михайлова', department: 'Support', position: 'Младший саппорт', grade: 'Junior', scheduleType: 'Сменный', shiftType: 'Ночная' },
+        { id: 7, fullName: 'Иван Орлов', department: 'Support', position: 'Старший саппорт', grade: 'Middle', scheduleType: 'Стандартный', shiftType: 'Дневная' },
+        // Sales отдел
+        { id: 8, fullName: 'Мария Петрова', department: 'Sales', position: 'Менеджер', grade: 'Junior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
+        { id: 9, fullName: 'Дмитрий Соколов', department: 'Sales', position: 'Потичск', grade: 'Middle', scheduleType: 'Сменный', shiftType: 'Любая' },
+        // { id: 10, fullName: 'Наталья Волкова', department: 'Sales', position: 'Менеджер', grade: 'Senior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
     ];
 
     const [filters, setFilters] = useState<FilterState>({
@@ -41,6 +47,50 @@ export const UsersPage = () => {
     });
 
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Функция для получения доступных значений фильтров на основе текущих фильтров и данных пользователей
+    const availableFilterOptions = useMemo(() => {
+        // Начинаем с полного списка пользователей
+        let filtered = allUsers;
+
+        // Применяем текущие фильтры по очереди, исключая поле, для которого вычисляем
+        // Для каждого поля вычисляем уникальные значения из отфильтрованного списка
+
+        // Доступные отделы
+        const departments = Array.from(new Set(filtered.map(user => user.department)));
+
+        // Доступные позиции с учетом выбранного отдела и грейда (если выбраны)
+        let positionsFiltered = filtered;
+        if (filters.department) {
+            positionsFiltered = positionsFiltered.filter(user => user.department === filters.department);
+        }
+        if (filters.grade) {
+            positionsFiltered = positionsFiltered.filter(user => user.grade === filters.grade);
+        }
+        const positions = Array.from(new Set(positionsFiltered.map(user => user.position)));
+
+        // Доступные грейды с учетом выбранного отдела и позиции
+        let gradesFiltered = filtered;
+        if (filters.department) {
+            gradesFiltered = gradesFiltered.filter(user => user.department === filters.department);
+        }
+        if (filters.position) {
+            gradesFiltered = gradesFiltered.filter(user => user.position === filters.position);
+        }
+        const grades = Array.from(new Set(gradesFiltered.map(user => user.grade)));
+
+        // Доступные типы графиков и смен (не зависят от других фильтров, но можно тоже ограничить)
+        const scheduleTypes = Array.from(new Set(filtered.map(user => user.scheduleType)));
+        const shiftTypes = Array.from(new Set(filtered.map(user => user.shiftType)));
+
+        return {
+            departments: ['', ...departments],
+            positions: ['', ...positions],
+            grades: ['', ...grades],
+            scheduleTypes: ['', ...scheduleTypes],
+            shiftTypes: ['', ...shiftTypes],
+        };
+    }, [filters, allUsers]);
 
     const filteredUsers = useMemo(() => {
         return allUsers.filter(user => {
@@ -91,6 +141,7 @@ export const UsersPage = () => {
             <UsersFilterForm
                 onApplyFilters={handleApplyFilters}
                 onResetFilters={handleResetFilters}
+                availableOptions={availableFilterOptions}
             />
             <table className={styles.table}>
                 <thead>

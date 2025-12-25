@@ -1,7 +1,8 @@
 export const PATHS = {
     root: "/",
-    auth: "auth",
+    auth: "/auth",
     users: "/users",
+    profile: "/profile",
 
-    serverIsAvailable: "serverIsAvailable",
+    serverIsAvailable: "/serverIsAvailable",
 }

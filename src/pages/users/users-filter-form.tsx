@@ -13,9 +13,16 @@ interface FilterState {
 interface UsersFilterFormProps {
     onApplyFilters: (filters: FilterState) => void;
     onResetFilters: () => void;
+    availableOptions?: {
+        departments: string[];
+        positions: string[];
+        grades: string[];
+        scheduleTypes: string[];
+        shiftTypes: string[];
+    };
 }
 
-export const UsersFilterForm = ({ onApplyFilters, onResetFilters }: UsersFilterFormProps) => {
+export const UsersFilterForm = ({ onApplyFilters, onResetFilters, availableOptions }: UsersFilterFormProps) => {
     const [filters, setFilters] = useState<FilterState>({
         department: '',
         position: '',
@@ -26,9 +33,39 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters }: UsersFilterF
 
     const [focusedSelectId, setFocusedSelectId] = useState<string | null>(null);
 
+    // Используем переданные доступные варианты или fallback на пустые массивы
+    const {
+        departments = [''],
+        positions = [''],
+        grades = [''],
+        scheduleTypes = [''],
+        shiftTypes = ['']
+    } = availableOptions || {};
+
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFilters(prev => ({ ...prev, [name]: value }));
+
+        setFilters(prev => {
+            const newFilters = { ...prev, [name]: value };
+
+            // Если изменился отдел, сбрасываем позицию и грейд, если они больше не доступны
+            if (name === 'department') {
+                // Получаем доступные позиции и грейды для нового отдела из availableOptions
+                // (это будет обработано на уровне родителя, здесь просто сбрасываем)
+                // Проверяем, если текущая позиция не входит в доступные для нового отдела, сбрасываем
+                // Поскольку мы не знаем доступные позиции здесь, просто сбрасываем всегда
+                // (более точная логика будет в родительском компоненте)
+                newFilters.position = '';
+                newFilters.grade = '';
+            }
+            // Если изменилась позиция, сбрасываем грейд, если он не доступен для новой позиции
+            if (name === 'position') {
+                newFilters.grade = '';
+            }
+            // Если изменился грейд, сбрасываем позицию? Нет, оставляем как есть.
+
+            return newFilters;
+        });
     };
 
     const handleFocus = (id: string) => {
@@ -53,13 +90,6 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters }: UsersFilterF
         });
         onResetFilters();
     };
-
-    // Возможные значения для фильтров (можно вынести в константы)
-    const departments = ['', 'Support', 'Sales'];
-    const positions = ['', 'Менеджер', 'Потичск'];
-    const grades = ['', 'Junior', 'Middle', 'Senior'];
-    const scheduleTypes = ['', 'Стандартный', 'Сменный'];
-    const shiftTypes = ['', 'Дневная', 'Любая', 'Ночная'];
 
     const isFocused = (id: string) => focusedSelectId === id;
 

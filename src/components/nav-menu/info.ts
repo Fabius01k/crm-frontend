@@ -24,13 +24,16 @@ export const adminNavMenuItems: NavMenuType[] = [
         link: PATHS.root,
         img: homeIcon,
     },
-   {
+    {
         index: 2,
         title: "Пользователи",
         link: PATHS.users,
         img: calendarIcon,
-   },
-
-
-   
+    },
+    {
+        index: 3,
+        title: "Профиль",
+        link: PATHS.profile,
+        img: calendarIcon,
+    },
 ]
