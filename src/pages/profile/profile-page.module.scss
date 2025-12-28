@@ -1,7 +1,7 @@
 .container {
     padding: 24px;
     max-width: 1200px;
-    margin: 0 auto;
+    //margin: 0 auto;
 }
 
 h2 {
@@ -11,30 +11,48 @@ h2 {
     color: #1a1a1a;
 }
 
-.profileCard {
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    padding: 32px;
+.profileContent {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+.column {
     display: flex;
     flex-direction: column;
     gap: 32px;
 }
 
+.card {
+    background: #F0F4F7;
+    border-radius: 20px;
+    padding: 32px;
+}
+
+.card h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 24px 0;
+    color: #1a1a1a;
+}
+
 .avatarSection {
     display: flex;
-    align-items: center;
-    gap: 24px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid #eaeaea;
+    justify-content: flex-start;
+    margin-bottom: 16px;
 }
 
 .avatar {
     width: 150px;
     height: 150px;
-    border-radius: 50%;
+    border-radius: 20px;
     overflow: hidden;
-    border: 4px solid #f0f0f0;
+    position: relative;
+    cursor: pointer;
+}
+
+.avatar:hover .avatarOverlay {
+    opacity: 1;
 }
 
 .avatarImage {
@@ -43,82 +61,63 @@ h2 {
     object-fit: cover;
 }
 
-.avatarInfo {
-    flex: 1;
-}
-
-.avatarInfo h3 {
-    font-size: 24px;
-    font-weight: 600;
-    margin: 0 0 8px 0;
-    color: #1a1a1a;
-}
-
-.email {
-    font-size: 16px;
-    color: #666;
-    margin: 0 0 8px 0;
-}
-
-.department {
-    font-size: 16px;
-    color: #888;
-    margin: 0 0 16px 0;
-}
-
-.editButton {
-    background: #007bff;
+.avatarOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
     color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.2s;
     font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
-
-    &:hover {
-        background: #0056b3;
-    }
 }
 
-.detailsSection h4 {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0 0 20px 0;
-    color: #1a1a1a;
+.avatarOverlay.visible {
+    /* This class can be used to force visibility if needed, but hover is usually enough */
 }
 
-.infoGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+.infoList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .infoItem {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 16px 24px;
     align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
 }
 
 .label {
-    font-weight: 500;
-    color: #555;
-    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 100%;
+    color: #1a1a1a;
+    text-align: left;
 }
 
 .value {
+    font-family: 'Inter', sans-serif;
     font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
     color: #1a1a1a;
-    font-size: 15px;
+    text-align: left;
 }
 
 .editForm {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .formGroup {
@@ -128,13 +127,12 @@ h2 {
 }
 
 .formGroup label {
-    font-weight: 500;
-    color: #555;
     font-size: 14px;
+    color: #666;
+    font-weight: 500;
 }
 
-.formGroup input,
-.formGroup select {
+.formGroup input {
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 6px;
@@ -147,23 +145,47 @@ h2 {
     }
 }
 
-.buttonGroup {
-    grid-column: 1 / -1;
+.workImageContainer {
     display: flex;
-    gap: 12px;
-    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.workImage {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+}
+
+.actions {
+    margin-top: 32px;
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+}
+
+.editButton, .saveButton, .cancelButton {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s;
+}
+
+.editButton {
+    background: #007bff;
+    color: white;
+
+    &:hover {
+        background: #0056b3;
+    }
 }
 
 .saveButton {
     background: #28a745;
     color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 12px 24px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
 
     &:hover {
         background: #218838;
@@ -173,31 +195,94 @@ h2 {
 .cancelButton {
     background: #6c757d;
     color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 12px 24px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
 
     &:hover {
         background: #545b62;
     }
 }
 
-@media (max-width: 768px) {
-    .avatarSection {
-        flex-direction: column;
-        text-align: center;
-    }
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
 
-    .infoGrid,
-    .editForm {
+.modalContent {
+    background: white;
+    padding: 32px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.modalContent h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.avatarGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.avatarOption {
+    cursor: pointer;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid transparent;
+    transition: border-color 0.2s;
+    aspect-ratio: 1;
+}
+
+.avatarOption:hover {
+    border-color: #e0e0e0;
+}
+
+.avatarOption.selected {
+    border-color: #007bff;
+}
+
+.avatarOption img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.closeButton {
+    background: #f0f0f0;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+
+    &:hover {
+        background: #e0e0e0;
+    }
+}
+
+@media (max-width: 768px) {
+    .profileContent {
         grid-template-columns: 1fr;
     }
 
-    .container {
-        padding: 16px;
+    .infoItem {
+        grid-template-columns: 1fr;
+        gap: 8px;
     }
 }

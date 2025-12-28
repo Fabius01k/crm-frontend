@@ -4,7 +4,7 @@
   background-color: #F0F4F7;
   width: auto;
   box-sizing: border-box;
-  height: calc(100vh - 200px); /* Минус высота header и footer */
+  //height: calc(100vh - 100px); /* Минус высота header */
   position: fixed;
   left: 0;
   top: 100px; /* Высота header */
@@ -12,7 +12,7 @@
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease;
   overflow: hidden;
-  padding: 0.5rem 0;
+  //padding: 0.5rem 0;
 
   // &--open {
   //   width: 220px;
