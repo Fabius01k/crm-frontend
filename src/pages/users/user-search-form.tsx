@@ -1,6 +1,7 @@
-import { type ChangeEvent, useState } from 'react';
+import { type ChangeEvent, useState, useEffect } from 'react';
 import searchIcon from '@assets/icons/search.svg';
 import styles from './users-page.module.scss';
+import { useDebounce } from '../../hooks/use-debounce';
 
 interface UserSearchFormProps {
     onSearch: (query: string) => void;
@@ -8,16 +9,20 @@ interface UserSearchFormProps {
 
 export const UserSearchForm = ({ onSearch }: UserSearchFormProps) => {
     const [query, setQuery] = useState('');
+    const debouncedQuery = useDebounce(query, 1000);
+
+    useEffect(() => {
+        onSearch(debouncedQuery);
+    }, [debouncedQuery, onSearch]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setQuery(value);
-        onSearch(value);
+        setQuery(e.target.value);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSearch(query);
+        console.log("Отправка запроса на сервер для поиска");
+        alert("Отправка запроса на сервер для поиска")
     };
 
     return (
