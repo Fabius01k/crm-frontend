@@ -1,7 +1,7 @@
 import { type ChangeEvent, useState, useEffect } from 'react';
 import searchIcon from '@assets/icons/search.svg';
 import styles from './users-page.module.scss';
-import { useDebounce } from '../../hooks/use-debounce';
+import { useDebounce } from '@hooks/use-debounce.ts';
 
 interface UserSearchFormProps {
     onSearch: (query: string) => void;
