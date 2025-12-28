@@ -24,7 +24,7 @@ const AuthPage = () => {
         if (error) {
             dispatch(authSliceActions.setLoading(false))
         }
-    }, [email, password, dispatch])
+    }, [email, password, dispatch, error])
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -48,7 +48,7 @@ const AuthPage = () => {
 
     const getButtonText = () => {
         if (loading) return "Загрузка..."
-        return "Login"
+        return "Войти"
     }
 
     return (
@@ -66,7 +66,7 @@ const AuthPage = () => {
                 )}
 
                 <div className={styles.field}>
-                    <label>Email:</label>
+                    <label>Почта:</label>
                     <input
                         type="email"
                         value={email}
@@ -77,7 +77,7 @@ const AuthPage = () => {
                     />
                 </div>
                 <div className={styles.field}>
-                    <label>Password:</label>
+                    <label>Пароль:</label>
                     <PasswordInput
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}

@@ -19,7 +19,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
     onChange,
     disabled = false,
     required = false,
-    placeholder = "Введите пароль",
+    placeholder = "",
     id,
     name,
     className = "",

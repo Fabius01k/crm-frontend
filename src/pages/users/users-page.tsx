@@ -51,7 +51,7 @@ export const UsersPage = () => {
     // Функция для получения доступных значений фильтров на основе текущих фильтров и данных пользователей
     const availableFilterOptions = useMemo(() => {
         // Начинаем с полного списка пользователей
-        let filtered = allUsers;
+        const filtered = allUsers;
 
         // Применяем текущие фильтры по очереди, исключая поле, для которого вычисляем
         // Для каждого поля вычисляем уникальные значения из отфильтрованного списка
@@ -108,10 +108,10 @@ export const UsersPage = () => {
             if (filters.position && user.position !== filters.position) return false;
             if (filters.grade && user.grade !== filters.grade) return false;
             if (filters.scheduleType && user.scheduleType !== filters.scheduleType) return false;
-            if (filters.shiftType && user.shiftType !== filters.shiftType) return false;
-            return true;
+            return !(filters.shiftType && user.shiftType !== filters.shiftType);
+
         });
-    }, [filters, searchQuery]);
+    }, [allUsers, filters.department, filters.grade, filters.position, filters.scheduleType, filters.shiftType, searchQuery]);
 
     const handleApplyFilters = (newFilters: FilterState) => {
         setFilters(newFilters);
@@ -133,7 +133,7 @@ export const UsersPage = () => {
 
     return (
         <div className={styles.container}>
-            <h2>Пользователи</h2>
+            {/*<h2>Пользователи</h2>*/}
             {allUsers && allUsers.length > 0 && (
                 <div>Всего пользователей: {allUsers.length}</div>
             )}
