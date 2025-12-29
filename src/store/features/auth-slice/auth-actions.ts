@@ -9,6 +9,9 @@ export const authActs = {
     setLoading: (state: AuthSliceType, action: PayloadAction<boolean>) => {
         state.loading = action.payload;
     },
+    setError: (state: AuthSliceType, action: PayloadAction<string | null>) => {
+        state.error = action.payload;
+    },
     logout: (state: AuthSliceType) => {
         state.user.id = null;
         state.user.name = "";

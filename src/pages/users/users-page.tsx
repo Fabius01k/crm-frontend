@@ -1,17 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { UsersFilterForm } from './users-filter-form';
 import { UserSearchForm } from './user-search-form';
 import styles from './users-page.module.scss';
-
-interface User {
-    id: number;
-    fullName: string;
-    department: string;
-    position: string;
-    grade: string;
-    scheduleType: string;
-    shiftType: string;
-}
+import { useAppDispatch, useAppSelector } from '@store/store';
+import { userThunks } from '@store/features/user-slice/user-thunks';
+import { userSliceActions } from '@store/features/user-slice/user-slice';
 
 interface FilterState {
     department: string;
@@ -22,21 +15,8 @@ interface FilterState {
 }
 
 export const UsersPage = () => {
-    const allUsers: User[] = [
-        // IT отдел
-        { id: 1, fullName: 'Алексей Иванов', department: 'IT', position: 'Фронт разработчик', grade: 'Junior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
-        { id: 2, fullName: 'Ольга Смирнова', department: 'IT', position: 'Бек разработчик', grade: 'Middle', scheduleType: 'Сменный', shiftType: 'Любая' },
-        { id: 3, fullName: 'Даниил Петров', department: 'IT', position: 'Фул стак', grade: 'Senior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
-        { id: 4, fullName: 'Елена Козлова', department: 'IT', position: 'Фронт разработчик', grade: 'Middle', scheduleType: 'Стандартный', shiftType: 'Дневная' },
-        // Support отдел
-        { id: 5, fullName: 'Сергей Сидоров', department: 'Support', position: 'Старший саппорт', grade: 'Senior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
-        { id: 6, fullName: 'Анна Михайлова', department: 'Support', position: 'Младший саппорт', grade: 'Junior', scheduleType: 'Сменный', shiftType: 'Ночная' },
-        { id: 7, fullName: 'Иван Орлов', department: 'Support', position: 'Старший саппорт', grade: 'Middle', scheduleType: 'Стандартный', shiftType: 'Дневная' },
-        // Sales отдел
-        { id: 8, fullName: 'Мария Петрова', department: 'Sales', position: 'Менеджер', grade: 'Junior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
-        { id: 9, fullName: 'Дмитрий Соколов', department: 'Sales', position: 'Потичск', grade: 'Middle', scheduleType: 'Сменный', shiftType: 'Любая' },
-        // { id: 10, fullName: 'Наталья Волкова', department: 'Sales', position: 'Менеджер', grade: 'Senior', scheduleType: 'Стандартный', shiftType: 'Дневная' },
-    ];
+    const dispatch = useAppDispatch();
+    const { users, loading, error, pagination, searchQuery } = useAppSelector((state) => state.user);
 
     const [filters, setFilters] = useState<FilterState>({
         department: '',
@@ -46,20 +26,83 @@ export const UsersPage = () => {
         shiftType: '',
     });
 
-    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const prevFilters = useRef(filters);
+    const prevSearchQuery = useRef(searchQuery);
+    const prevPage = useRef(currentPage);
+    const isInitialMount = useRef(true);
+
+    // Эффект для загрузки пользователей
+    useEffect(() => {
+        const filtersChanged =
+            prevFilters.current.department !== filters.department ||
+            prevFilters.current.position !== filters.position ||
+            prevFilters.current.grade !== filters.grade ||
+            prevFilters.current.scheduleType !== filters.scheduleType ||
+            prevFilters.current.shiftType !== filters.shiftType;
+        const searchChanged = prevSearchQuery.current !== searchQuery;
+
+        // Если это первый рендер, просто загружаем данные
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            const params = {
+                department: filters.department || undefined,
+                position: filters.position || undefined,
+                grade: filters.grade || undefined,
+                workSchedule: filters.scheduleType || undefined,
+                preferredShiftType: filters.shiftType || undefined,
+                page: currentPage,
+            };
+            dispatch(userThunks.fetchUsers(params));
+            prevFilters.current = filters;
+            prevSearchQuery.current = searchQuery;
+            prevPage.current = currentPage;
+            return;
+        }
+
+        // Определяем, какой запрос делать
+        if (searchQuery.trim().length >= 2) {
+            // При поиске игнорируем пагинацию
+            dispatch(userThunks.searchUsers(searchQuery.trim()));
+        } else {
+            const pageToLoad = (filtersChanged || searchChanged) ? 1 : currentPage;
+            const params = {
+                department: filters.department || undefined,
+                position: filters.position || undefined,
+                grade: filters.grade || undefined,
+                workSchedule: filters.scheduleType || undefined,
+                preferredShiftType: filters.shiftType || undefined,
+                page: pageToLoad,
+            };
+            dispatch(userThunks.fetchUsers(params));
+        }
+
+        // Обновляем предыдущие значения
+        prevFilters.current = filters;
+        prevSearchQuery.current = searchQuery;
+        prevPage.current = currentPage;
+    }, [dispatch, filters, searchQuery, currentPage]);
+
+    // Преобразование пользователей из API в формат компонента
+    const transformedUsers = useMemo(() => {
+        return users.map((user) => ({
+            id: Number(user.id) || 0,
+            fullName: user.fullName,
+            department: user.department || '',
+            position: user.position || '',
+            grade: user.grade || '',
+            scheduleType: user.workSchedule || '',
+            shiftType: user.preferredShiftType || '',
+        }));
+    }, [users]);
 
     // Функция для получения доступных значений фильтров на основе текущих фильтров и данных пользователей
     const availableFilterOptions = useMemo(() => {
-        // Начинаем с полного списка пользователей
-        const filtered = allUsers;
+        const filtered = transformedUsers;
 
-        // Применяем текущие фильтры по очереди, исключая поле, для которого вычисляем
-        // Для каждого поля вычисляем уникальные значения из отфильтрованного списка
-
-        // Доступные отделы
         const departments = Array.from(new Set(filtered.map(user => user.department)));
 
-        // Доступные позиции с учетом выбранного отдела и грейда (если выбраны)
         let positionsFiltered = filtered;
         if (filters.department) {
             positionsFiltered = positionsFiltered.filter(user => user.department === filters.department);
@@ -69,7 +112,6 @@ export const UsersPage = () => {
         }
         const positions = Array.from(new Set(positionsFiltered.map(user => user.position)));
 
-        // Доступные грейды с учетом выбранного отдела и позиции
         let gradesFiltered = filtered;
         if (filters.department) {
             gradesFiltered = gradesFiltered.filter(user => user.department === filters.department);
@@ -79,7 +121,6 @@ export const UsersPage = () => {
         }
         const grades = Array.from(new Set(gradesFiltered.map(user => user.grade)));
 
-        // Доступные типы графиков и смен (не зависят от других фильтров, но можно тоже ограничить)
         const scheduleTypes = Array.from(new Set(filtered.map(user => user.scheduleType)));
         const shiftTypes = Array.from(new Set(filtered.map(user => user.shiftType)));
 
@@ -90,11 +131,10 @@ export const UsersPage = () => {
             scheduleTypes: ['', ...scheduleTypes],
             shiftTypes: ['', ...shiftTypes],
         };
-    }, [filters, allUsers]);
+    }, [filters, transformedUsers]);
 
     const filteredUsers = useMemo(() => {
-        return allUsers.filter(user => {
-            // Поиск по ФИО (регистронезависимый)
+        return transformedUsers.filter(user => {
             if (searchQuery.trim() !== '') {
                 const query = searchQuery.toLowerCase();
                 const fullName = user.fullName.toLowerCase();
@@ -103,17 +143,25 @@ export const UsersPage = () => {
                 }
             }
 
-            // Фильтры по остальным полям
             if (filters.department && user.department !== filters.department) return false;
             if (filters.position && user.position !== filters.position) return false;
             if (filters.grade && user.grade !== filters.grade) return false;
             if (filters.scheduleType && user.scheduleType !== filters.scheduleType) return false;
             return !(filters.shiftType && user.shiftType !== filters.shiftType);
-
         });
-    }, [allUsers, filters.department, filters.grade, filters.position, filters.scheduleType, filters.shiftType, searchQuery]);
+    }, [transformedUsers, filters.department, filters.grade, filters.position, filters.scheduleType, filters.shiftType, searchQuery]);
 
     const handleApplyFilters = (newFilters: FilterState) => {
+        // Если фильтры изменились, сбрасываем страницу на 1
+        if (
+            newFilters.department !== filters.department ||
+            newFilters.position !== filters.position ||
+            newFilters.grade !== filters.grade ||
+            newFilters.scheduleType !== filters.scheduleType ||
+            newFilters.shiftType !== filters.shiftType
+        ) {
+            setCurrentPage(1);
+        }
         setFilters(newFilters);
     };
 
@@ -125,19 +173,33 @@ export const UsersPage = () => {
             scheduleType: '',
             shiftType: '',
         });
+        dispatch(userSliceActions.setSearchQuery(''));
+        setCurrentPage(1);
     };
 
-    const handleSearch = (query: string) => {
-        setSearchQuery(query);
+    const handlePageChange = (newPage: number) => {
+        if (newPage < 1 || (pagination && newPage > pagination.totalPages)) return;
+        setCurrentPage(newPage);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+
+    if (loading) {
+        return <div className={styles.container}>Загрузка...</div>;
+    }
+
+    if (error) {
+        return <div className={styles.container}>Ошибка: {error}</div>;
+    }
+
+    const showPagination = pagination && pagination.totalPages > 1 && searchQuery.trim().length < 2;
 
     return (
         <div className={styles.container}>
             {/*<h2>Пользователи</h2>*/}
-            {allUsers && allUsers.length > 0 && (
-                <div>Всего пользователей: {allUsers.length}</div>
+            {transformedUsers && transformedUsers.length > 0 && (
+                <div>Всего пользователей: {pagination?.total ?? transformedUsers.length}</div>
             )}
-            <UserSearchForm onSearch={handleSearch} />
+            <UserSearchForm />
             <UsersFilterForm
                 onApplyFilters={handleApplyFilters}
                 onResetFilters={handleResetFilters}
@@ -167,6 +229,28 @@ export const UsersPage = () => {
                     ))}
                 </tbody>
             </table>
+
+            {showPagination && (
+                <div className={styles.pagination}>
+                    <button
+                        className={styles.paginationButton}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    >
+                        Назад
+                    </button>
+                    <span className={styles.paginationInfo}>
+                        Страница {currentPage} из {pagination.totalPages}
+                    </span>
+                    <button
+                        className={styles.paginationButton}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === pagination.totalPages}
+                    >
+                        Вперед
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

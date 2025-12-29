@@ -19,3 +19,12 @@ export const authSliceInitialState: AuthSliceType = {
     loading: false,
     error: null,
 }
+
+export interface LoginResponse {
+    accessToken: string;
+}
+
+export interface LoginCredentials {
+    email: string;
+    password: string;
+}

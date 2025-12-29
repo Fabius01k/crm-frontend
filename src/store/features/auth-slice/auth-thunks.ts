@@ -1,19 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { AxiosError } from 'axios';
-import type { UserType } from "./auth-types.ts";
 import { authAPI } from "./auth-api.ts";
 import { LOCAL_STORAGE_ACCESS_TOKEN, LOCAL_STORAGE_REFRESH_TOKEN } from "@constants/constants";
-import { authSliceActions } from "@store/features/auth-slice/auth-slice";
-
-// Определим типы для ответа и аргументов thunk
-export interface LoginResponse {
-    accessToken: string;
-}
-
-export interface LoginCredentials {
-    email: string;
-    password: string;
-}
+import type { LoginCredentials, LoginResponse } from "./auth-types.ts";
 
 export const authThunks = {
 
@@ -29,8 +18,6 @@ export const authThunks = {
         async (credentials, thunkAPI) => {
             try {
                 const response = await authAPI.login(credentials);
-                // После успешного логина получаем профиль пользователя
-                thunkAPI.dispatch(authThunks.getProfile());
                 return response.data; // Это значение станет payload для fulfilled action
             } catch (error) {
                 const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;
@@ -67,26 +54,8 @@ export const authThunks = {
         async (_, thunkAPI) => {
             try {
                 await authAPI.logout();
-                thunkAPI.dispatch(authSliceActions.logout());
                 localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN);
                 localStorage.removeItem(LOCAL_STORAGE_REFRESH_TOKEN);
-            } catch (error) {
-                const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;
-                const errorMessage = axiosError.response?.data?.message || axiosError.message || 'Unknown error';
-                return thunkAPI.rejectWithValue(errorMessage);
-            }
-        }
-    ),
-
-    /**
-     * Thunk для получения профиля пользователя.
-     */
-    getProfile: createAsyncThunk<UserType, void, { rejectValue: string }>(
-        'auth/getProfile',
-        async (_, thunkAPI) => {
-            try {
-                const response = await authAPI.getProfile();
-                return response.data; // UserType
             } catch (error) {
                 const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;
                 const errorMessage = axiosError.response?.data?.message || axiosError.message || 'Unknown error';

@@ -72,6 +72,7 @@ const authSlice = createSlice({
             })
             .addCase(authThunks.logoutUser.fulfilled, (state) => {
                 state.loading = false;
+                state.user = { id: null, name: "" };
                 // Очищаем localStorage при выходе
                 localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN);
                 localStorage.removeItem(LOCAL_STORAGE_REFRESH_TOKEN);
@@ -79,21 +80,6 @@ const authSlice = createSlice({
             .addCase(authThunks.logoutUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? 'Произошла ошибка выхода';
-            })
-            // Добавляем обработку для getProfile
-            .addCase(authThunks.getProfile.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(authThunks.getProfile.fulfilled, (state, action) => {
-                state.loading = false;
-                if (action.payload) {
-                    state.user = action.payload;
-                }
-            })
-            .addCase(authThunks.getProfile.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload ?? 'Ошибка загрузки профиля';
             });
     },
 })

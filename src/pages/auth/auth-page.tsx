@@ -22,7 +22,7 @@ const AuthPage = () => {
     // Очищаем ошибку при изменении полей
     React.useEffect(() => {
         if (error) {
-            dispatch(authSliceActions.setLoading(false))
+            dispatch(authSliceActions.setError(null))
         }
     }, [email, password, dispatch, error])
 
