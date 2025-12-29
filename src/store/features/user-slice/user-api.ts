@@ -8,6 +8,7 @@ import type {
     FindUsersDto,
     UsersResponse,
     UserPageDto,
+    CompanyStructureResponse,
 } from "./user-types";
 
 const userApiBaseURI = "users";
@@ -84,6 +85,12 @@ export const userAPI = {
     // DELETE /users/:id
     deleteUser: async (id: string): Promise<{ message: string }> => {
         const response = await instance.delete<{ message: string }>(`${userApiBaseURI}/${id}`);
+        return response.data;
+    },
+
+    // GET /company/structure
+    getCompanyStructure: async (): Promise<CompanyStructureResponse> => {
+        const response = await instance.get<CompanyStructureResponse>("company/structure");
         return response.data;
     },
 };

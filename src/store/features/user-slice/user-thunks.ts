@@ -10,6 +10,7 @@ import type {
     FindUsersDto,
     UsersResponse,
     UserPageDto,
+    CompanyStructureResponse,
 } from "./user-types";
 
 export const userThunks = {
@@ -166,6 +167,21 @@ export const userThunks = {
         async (id, thunkAPI) => {
             try {
                 const response = await userAPI.deleteUser(id);
+                return response;
+            } catch (error) {
+                const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;
+                const errorMessage = axiosError.response?.data?.message || axiosError.message || 'Unknown error';
+                return thunkAPI.rejectWithValue(errorMessage);
+            }
+        }
+    ),
+
+    // Получить структуру компании
+    fetchCompanyStructure: createAsyncThunk<CompanyStructureResponse, void, { rejectValue: string }>(
+        'users/fetchCompanyStructure',
+        async (_, thunkAPI) => {
+            try {
+                const response = await userAPI.getCompanyStructure();
                 return response;
             } catch (error) {
                 const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;

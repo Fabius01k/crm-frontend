@@ -80,9 +80,25 @@ export interface UsersResponse {
     };
 }
 
+export interface Position {
+    code: string;
+    name: string;
+}
+
+export interface CompanyStructureItem {
+    code: string;
+    name: string;
+    positions: Position[];
+}
+
+export interface CompanyStructureResponse {
+    data: CompanyStructureItem[];
+}
+
 export interface UserSliceType {
     users: User[];
     currentUser: UserPageDto | null;
+    companyStructure: CompanyStructureItem[] | null;
     loading: boolean;
     error: string | null;
     pagination: {
@@ -97,6 +113,7 @@ export interface UserSliceType {
 export const userSliceInitialState: UserSliceType = {
     users: [],
     currentUser: null,
+    companyStructure: null,
     loading: false,
     error: null,
     pagination: null,

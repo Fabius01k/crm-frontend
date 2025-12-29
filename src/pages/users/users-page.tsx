@@ -87,7 +87,7 @@ export const UsersPage = () => {
     // Преобразование пользователей из API в формат компонента
     const transformedUsers = useMemo(() => {
         return users.map((user) => ({
-            id: Number(user.id) || 0,
+            id: user.id,
             fullName: user.fullName,
             department: user.department || '',
             position: user.position || '',

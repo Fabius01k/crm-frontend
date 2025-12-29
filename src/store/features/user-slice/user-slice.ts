@@ -189,6 +189,22 @@ const userSlice = createSlice({
                 state.error = action.payload ?? 'Ошибка удаления пользователя';
                 toast.error(state.error);
             });
+
+        // fetchCompanyStructure
+        builder
+            .addCase(userThunks.fetchCompanyStructure.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(userThunks.fetchCompanyStructure.fulfilled, (state, action) => {
+                state.loading = false;
+                state.companyStructure = action.payload.data;
+            })
+            .addCase(userThunks.fetchCompanyStructure.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload ?? 'Ошибка загрузки структуры компании';
+                toast.error(state.error);
+            });
     },
 });
 
