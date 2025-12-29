@@ -5,14 +5,15 @@
   width: auto;
   box-sizing: border-box;
   //height: calc(100vh - 100px); /* Минус высота header */
+  height: 100svh;
   position: fixed;
   left: 0;
-  top: 100px; /* Высота header */
-  z-index: 999; /* Ниже header (1000) и footer (1000) */
+  //top: 100px; /* Высота header */
+  z-index: 1001; /* Выше header (1000) и footer (1000) */
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease;
   overflow: hidden;
-  //padding: 0.5rem 0;
+  padding: 70px 0;
 
   // &--open {
   //   width: 220px;
@@ -37,12 +38,13 @@
     border: none;
     cursor: pointer;
     padding: 0.5rem;
-    margin: -5px 0 0 0;
+    margin: 0;
     transition: all 0.2s ease;
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-top: auto; /* Прижимает кнопку к низу контейнера */
 
     &:hover {
       background-color: rgba(100, 108, 255, 0.1);

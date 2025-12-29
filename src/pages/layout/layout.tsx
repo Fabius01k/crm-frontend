@@ -10,8 +10,9 @@ export const Layout = () => {
             <header className={styles.header}>
                 <Header />
             </header>
+            <NavMenu />
+
             <main className={styles.main}>
-                <NavMenu />
                 <Outlet />
             </main>
             <footer className={styles.footer}>

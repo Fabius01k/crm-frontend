@@ -3,6 +3,7 @@ import { PATHS } from "@router/paths"
 import hubIcon from "@assets/icons/menu/CgTeamHub.svg";
 import homeIcon from "@/assets/icons/menu/Home.svg"
 import calendarIcon from "@/assets/icons/menu/Calendar.svg"
+import usersIcon from "@/assets/icons/menu/users-icon.png"
 
 export type NavMenuType = {
     index: number,
@@ -28,7 +29,7 @@ export const adminNavMenuItems: NavMenuType[] = [
         index: 2,
         title: "Пользователи",
         link: PATHS.users,
-        img: calendarIcon,
+        img: usersIcon,
     },
     {
         index: 3,
