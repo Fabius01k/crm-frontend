@@ -203,6 +203,7 @@ export const UsersPage = () => {
             <UsersFilterForm
                 onApplyFilters={handleApplyFilters}
                 onResetFilters={handleResetFilters}
+                currentFilters={filters}
                 availableOptions={availableFilterOptions}
             />
             <table className={styles.table}>

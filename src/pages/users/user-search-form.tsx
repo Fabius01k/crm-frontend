@@ -1,4 +1,4 @@
-import { type ChangeEvent, useState, useEffect } from 'react';
+import { type ChangeEvent, useState, useEffect, useRef } from 'react';
 import searchIcon from '@assets/icons/search.svg';
 import styles from './users-page.module.scss';
 import { useDebounce } from '@hooks/use-debounce.ts';
@@ -10,20 +10,27 @@ export const UserSearchForm = () => {
     const searchQuery = useAppSelector((state) => state.user.searchQuery);
     const [inputValue, setInputValue] = useState(searchQuery);
     const debouncedInputValue = useDebounce(inputValue, 500);
+    const isExternalUpdate = useRef(false);
 
     // Синхронизация inputValue с Redux searchQuery при изменении извне
     useEffect(() => {
+        isExternalUpdate.current = true;
         setInputValue(searchQuery);
     }, [searchQuery]);
 
     // При изменении дебаунсированного значения обновляем Redux
     useEffect(() => {
+        if (isExternalUpdate.current) {
+            isExternalUpdate.current = false;
+            return;
+        }
         if (debouncedInputValue !== searchQuery) {
             dispatch(userSliceActions.setSearchQuery(debouncedInputValue));
         }
     }, [debouncedInputValue, dispatch, searchQuery]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        isExternalUpdate.current = false;
         setInputValue(e.target.value);
     };
 

@@ -1,4 +1,4 @@
-import { type ChangeEvent, useState } from 'react';
+import { type ChangeEvent, useState, useEffect } from 'react';
 import arrowIcon from '@assets/icons/arrow.svg';
 import styles from './users-page.module.scss';
 
@@ -13,6 +13,7 @@ interface FilterState {
 interface UsersFilterFormProps {
     onApplyFilters: (filters: FilterState) => void;
     onResetFilters: () => void;
+    currentFilters?: FilterState;
     availableOptions?: {
         departments: string[];
         positions: string[];
@@ -22,8 +23,8 @@ interface UsersFilterFormProps {
     };
 }
 
-export const UsersFilterForm = ({ onApplyFilters, onResetFilters, availableOptions }: UsersFilterFormProps) => {
-    const [filters, setFilters] = useState<FilterState>({
+export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters, availableOptions }: UsersFilterFormProps) => {
+    const [filters, setFilters] = useState<FilterState>(currentFilters || {
         department: '',
         position: '',
         grade: '',
@@ -32,6 +33,13 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, availableOptio
     });
 
     const [focusedSelectId, setFocusedSelectId] = useState<string | null>(null);
+
+    // Синхронизация локального состояния с переданными фильтрами из родителя
+    useEffect(() => {
+        if (currentFilters) {
+            setFilters(currentFilters);
+        }
+    }, [currentFilters]);
 
     // Используем переданные доступные варианты или fallback на пустые массивы
     const {
