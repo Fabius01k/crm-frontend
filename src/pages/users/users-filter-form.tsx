@@ -1,29 +1,23 @@
-import { type ChangeEvent, useState, useEffect } from 'react';
+import { type ChangeEvent, useState, useEffect, useMemo } from 'react';
 import arrowIcon from '@assets/icons/arrow.svg';
 import styles from './users-page.module.scss';
-
-interface FilterState {
-    department: string;
-    position: string;
-    grade: string;
-    scheduleType: string;
-    shiftType: string;
-}
+import type { FilterState, CompanyStructureItem } from '@store/features/user-slice/user-types';
 
 interface UsersFilterFormProps {
     onApplyFilters: (filters: FilterState) => void;
     onResetFilters: () => void;
     currentFilters?: FilterState;
     availableOptions?: {
-        departments: string[];
-        positions: string[];
+        departments: Array<{ code: string; name: string }>;
+        positions: Array<{ code: string; name: string }>;
         grades: string[];
         scheduleTypes: string[];
         shiftTypes: string[];
     };
+    companyStructure?: CompanyStructureItem[];
 }
 
-export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters, availableOptions }: UsersFilterFormProps) => {
+export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters, availableOptions, companyStructure }: UsersFilterFormProps) => {
     const [filters, setFilters] = useState<FilterState>(currentFilters || {
         department: '',
         position: '',
@@ -43,12 +37,38 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
 
     // Используем переданные доступные варианты или fallback на пустые массивы
     const {
-        departments = [''],
-        positions = [''],
+        departments = [{ code: '', name: '' }],
+        positions = [{ code: '', name: '' }],
         grades = [''],
         scheduleTypes = [''],
         shiftTypes = ['']
     } = availableOptions || {};
+
+    // Вычисляем позиции на основе структуры компании и выбранного отдела
+    const computedPositions = useMemo(() => {
+        if (companyStructure && companyStructure.length > 0) {
+            if (filters.department) {
+                // Ищем отдел по коду
+                const selectedDept = companyStructure.find(dept => dept.code === filters.department);
+                if (selectedDept) {
+                    return selectedDept.positions;
+                }
+            } else {
+                // Все уникальные позиции из всех отделов без повторений
+                const allPositions = companyStructure.flatMap(dept => dept.positions);
+                // Убираем дубликаты по коду
+                const uniquePositions = allPositions.reduce((acc, pos) => {
+                    if (!acc.some(p => p.code === pos.code)) {
+                        acc.push(pos);
+                    }
+                    return acc;
+                }, [] as Array<{ code: string; name: string }>);
+                return uniquePositions;
+            }
+        }
+        // Fallback к переданным позициям
+        return positions;
+    }, [companyStructure, filters.department, positions]);
 
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -116,9 +136,9 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
                             onBlur={handleBlur}
                             className={styles.filterSelect}
                         >
-                            {departments.map(dept => (
-                                <option key={dept} value={dept}>
-                                    {dept || 'Все'}
+                            {[{ code: '', name: 'Все' }, ...departments.filter(dept => dept.code !== '')].map(dept => (
+                                <option key={dept.code} value={dept.code}>
+                                    {dept.name}
                                 </option>
                             ))}
                         </select>
@@ -141,9 +161,9 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
                             onBlur={handleBlur}
                             className={styles.filterSelect}
                         >
-                            {positions.map(pos => (
-                                <option key={pos} value={pos}>
-                                    {pos || 'Все'}
+                            {[{ code: '', name: 'Все' }, ...computedPositions].map(pos => (
+                                <option key={pos.code} value={pos.code}>
+                                    {pos.name}
                                 </option>
                             ))}
                         </select>

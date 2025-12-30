@@ -62,12 +62,21 @@ export interface AdminChangePasswordDto {
 }
 
 export interface FindUsersDto {
-    department?: string;
-    position?: string;
+    department?: string;  // Код отдела
+    position?: string;    // Код позиции
     grade?: string;
     workSchedule?: string;
     preferredShiftType?: string;
     page?: number;
+}
+
+// Тип для фильтров в UI (хранит коды, но отображаются названия)
+export interface FilterState {
+    department: string;   // Код отдела
+    position: string;     // Код позиции
+    grade: string;
+    scheduleType: string;
+    shiftType: string;
 }
 
 export interface UsersResponse {

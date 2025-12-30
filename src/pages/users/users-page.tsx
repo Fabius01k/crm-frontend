@@ -5,18 +5,11 @@ import styles from './users-page.module.scss';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { userThunks } from '@store/features/user-slice/user-thunks';
 import { userSliceActions } from '@store/features/user-slice/user-slice';
-
-interface FilterState {
-    department: string;
-    position: string;
-    grade: string;
-    scheduleType: string;
-    shiftType: string;
-}
+import type { FilterState } from '@store/features/user-slice/user-types';
 
 export const UsersPage = () => {
     const dispatch = useAppDispatch();
-    const { users, loading, error, pagination, searchQuery } = useAppSelector((state) => state.user);
+    const { users, loading, error, pagination, searchQuery, companyStructure } = useAppSelector((state) => state.user);
 
     const [filters, setFilters] = useState<FilterState>({
         department: '',
@@ -32,6 +25,13 @@ export const UsersPage = () => {
     const prevSearchQuery = useRef(searchQuery);
     const prevPage = useRef(currentPage);
     const isInitialMount = useRef(true);
+
+    // Эффект для загрузки структуры компании
+    useEffect(() => {
+        if (!companyStructure) {
+            dispatch(userThunks.fetchCompanyStructure());
+        }
+    }, [dispatch, companyStructure]);
 
     // Эффект для загрузки пользователей
     useEffect(() => {
@@ -101,17 +101,63 @@ export const UsersPage = () => {
     const availableFilterOptions = useMemo(() => {
         const filtered = transformedUsers;
 
-        const departments = Array.from(new Set(filtered.map(user => user.department)));
-
-        let positionsFiltered = filtered;
-        if (filters.department) {
-            positionsFiltered = positionsFiltered.filter(user => user.department === filters.department);
+        // Отделы: из структуры компании, если она загружена, иначе из пользователей
+        let departments: Array<{ code: string; name: string }> = [];
+        if (companyStructure && companyStructure.length > 0) {
+            departments = companyStructure.map(dept => ({ code: dept.code, name: dept.name }));
+        } else {
+            departments = Array.from(new Set(filtered.map(user => user.department)))
+                .filter(dept => dept)
+                .map(dept => ({ code: dept, name: dept }));
         }
-        if (filters.grade) {
-            positionsFiltered = positionsFiltered.filter(user => user.grade === filters.grade);
-        }
-        const positions = Array.from(new Set(positionsFiltered.map(user => user.position)));
 
+        // Позиции: если выбран отдел, берем позиции из этого отдела, иначе все уникальные позиции из всех отделов
+        let positions: Array<{ code: string; name: string }> = [];
+        if (companyStructure && companyStructure.length > 0) {
+            if (filters.department) {
+                // Найти отдел по коду
+                const selectedDept = companyStructure.find(dept => dept.code === filters.department);
+                if (selectedDept) {
+                    positions = selectedDept.positions.map(pos => ({ code: pos.code, name: pos.name }));
+                } else {
+                    // Если отдел не найден в структуре, fallback к позициям из пользователей
+                    positions = Array.from(new Set(
+                        filtered
+                            .filter(user => user.department === filters.department)
+                            .map(user => user.position)
+                    ))
+                    .filter(pos => pos)
+                    .map(pos => ({ code: pos, name: pos }));
+                }
+            } else {
+                // Все уникальные позиции из всех отделов без повторений
+                const allPositions = companyStructure.flatMap(dept =>
+                    dept.positions.map(pos => ({ code: pos.code, name: pos.name }))
+                );
+                // Убираем дубликаты по коду
+                const uniquePositions = allPositions.reduce((acc, pos) => {
+                    if (!acc.some(p => p.code === pos.code)) {
+                        acc.push(pos);
+                    }
+                    return acc;
+                }, [] as Array<{ code: string; name: string }>);
+                positions = uniquePositions;
+            }
+        } else {
+            // Fallback к старой логике, если структура компании не загружена
+            let positionsFiltered = filtered;
+            if (filters.department) {
+                positionsFiltered = positionsFiltered.filter(user => user.department === filters.department);
+            }
+            if (filters.grade) {
+                positionsFiltered = positionsFiltered.filter(user => user.grade === filters.grade);
+            }
+            positions = Array.from(new Set(positionsFiltered.map(user => user.position)))
+                .filter(pos => pos)
+                .map(pos => ({ code: pos, name: pos }));
+        }
+
+        // Грейды: оставляем старую логику (из пользователей)
         let gradesFiltered = filtered;
         if (filters.department) {
             gradesFiltered = gradesFiltered.filter(user => user.department === filters.department);
@@ -125,13 +171,13 @@ export const UsersPage = () => {
         const shiftTypes = Array.from(new Set(filtered.map(user => user.shiftType)));
 
         return {
-            departments: ['', ...departments],
-            positions: ['', ...positions],
+            departments,
+            positions,
             grades: ['', ...grades],
             scheduleTypes: ['', ...scheduleTypes],
             shiftTypes: ['', ...shiftTypes],
         };
-    }, [filters, transformedUsers]);
+    }, [filters, transformedUsers, companyStructure]);
 
     const filteredUsers = useMemo(() => {
         return transformedUsers.filter(user => {
@@ -143,8 +189,12 @@ export const UsersPage = () => {
                 }
             }
 
+            // Для фильтрации по отделу: сравниваем коды
             if (filters.department && user.department !== filters.department) return false;
+
+            // Для фильтрации по позиции: сравниваем коды
             if (filters.position && user.position !== filters.position) return false;
+
             if (filters.grade && user.grade !== filters.grade) return false;
             if (filters.scheduleType && user.scheduleType !== filters.scheduleType) return false;
             return !(filters.shiftType && user.shiftType !== filters.shiftType);
@@ -205,6 +255,7 @@ export const UsersPage = () => {
                 onResetFilters={handleResetFilters}
                 currentFilters={filters}
                 availableOptions={availableFilterOptions}
+                companyStructure={companyStructure || undefined}
             />
             <table className={styles.table}>
                 <thead>
