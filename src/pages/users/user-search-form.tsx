@@ -49,7 +49,7 @@ export const UserSearchForm = () => {
                 <input
                     type="text"
                     className={styles.searchInput}
-                    placeholder="Поиск по имени или телефону"
+                    placeholder="Поиск по имени или почте"
                     value={inputValue}
                     onChange={handleChange}
                 />

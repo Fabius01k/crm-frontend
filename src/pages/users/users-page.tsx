@@ -1,11 +1,18 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { UsersFilterForm } from './users-filter-form';
 import { UserSearchForm } from './user-search-form';
+import { CreateUserModal } from '@components/CreateUserModal';
 import styles from './users-page.module.scss';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { userThunks } from '@store/features/user-slice/user-thunks';
 import { userSliceActions } from '@store/features/user-slice/user-slice';
 import type { FilterState } from '@store/features/user-slice/user-types';
+import {
+  UserGradeLabels,
+  WorkScheduleLabels,
+  ShiftPreferenceLabels,
+  getLabel,
+} from '@/common/enums/enums';
 
 export const UsersPage = () => {
     const dispatch = useAppDispatch();
@@ -20,6 +27,7 @@ export const UsersPage = () => {
     });
 
     const [currentPage, setCurrentPage] = useState(1);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const prevFilters = useRef(filters);
     const prevSearchQuery = useRef(searchQuery);
@@ -86,16 +94,39 @@ export const UsersPage = () => {
 
     // Преобразование пользователей из API в формат компонента
     const transformedUsers = useMemo(() => {
-        return users.map((user) => ({
-            id: user.id,
-            fullName: user.fullName,
-            department: user.department || '',
-            position: user.position || '',
-            grade: user.grade || '',
-            scheduleType: user.workSchedule || '',
-            shiftType: user.preferredShiftType || '',
-        }));
-    }, [users]);
+        // Создаем карту отделов: код -> название
+        const departmentMap = new Map<string, string>();
+        const positionMap = new Map<string, string>(); // код позиции -> название
+        if (companyStructure) {
+            companyStructure.forEach(dept => {
+                departmentMap.set(dept.code, dept.name);
+                dept.positions.forEach(pos => {
+                    positionMap.set(pos.code, pos.name);
+                });
+            });
+        }
+
+        return users.map((user) => {
+            const departmentName = user.department ? departmentMap.get(user.department) || user.department : '';
+            const positionName = user.position ? positionMap.get(user.position) || user.position : '';
+            return {
+                id: user.id,
+                fullName: user.fullName,
+                department: user.department || '',
+                position: user.position || '',
+                departmentName,
+                positionName,
+                // Исходные значения для фильтрации
+                grade: user.grade || '',
+                scheduleType: user.workSchedule || '',
+                shiftType: user.preferredShiftType || '',
+                // Метки для отображения
+                gradeLabel: user.grade ? getLabel(user.grade, UserGradeLabels) : '',
+                scheduleTypeLabel: user.workSchedule ? getLabel(user.workSchedule, WorkScheduleLabels) : '',
+                shiftTypeLabel: user.preferredShiftType ? getLabel(user.preferredShiftType, ShiftPreferenceLabels) : '',
+            };
+        });
+    }, [users, companyStructure]);
 
     // Функция для получения доступных значений фильтров на основе текущих фильтров и данных пользователей
     const availableFilterOptions = useMemo(() => {
@@ -170,12 +201,26 @@ export const UsersPage = () => {
         const scheduleTypes = Array.from(new Set(filtered.map(user => user.scheduleType)));
         const shiftTypes = Array.from(new Set(filtered.map(user => user.shiftType)));
 
+        // Преобразуем значения в объекты с русскими названиями
+        const gradeValues = ['', ...grades];
+        const scheduleTypeValues = ['', ...scheduleTypes];
+        const shiftTypeValues = ['', ...shiftTypes];
+
         return {
             departments,
             positions,
-            grades: ['', ...grades],
-            scheduleTypes: ['', ...scheduleTypes],
-            shiftTypes: ['', ...shiftTypes],
+            grades: gradeValues.map(value => ({
+                value,
+                label: value ? getLabel(value, UserGradeLabels) : 'Все',
+            })),
+            scheduleTypes: scheduleTypeValues.map(value => ({
+                value,
+                label: value ? getLabel(value, WorkScheduleLabels) : 'Все',
+            })),
+            shiftTypes: shiftTypeValues.map(value => ({
+                value,
+                label: value ? getLabel(value, ShiftPreferenceLabels) : 'Все',
+            })),
         };
     }, [filters, transformedUsers, companyStructure]);
 
@@ -233,6 +278,19 @@ export const UsersPage = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    const handleUserCreated = () => {
+        // Перезагружаем пользователей после создания
+        const params = {
+            department: filters.department || undefined,
+            position: filters.position || undefined,
+            grade: filters.grade || undefined,
+            workSchedule: filters.scheduleType || undefined,
+            preferredShiftType: filters.shiftType || undefined,
+            page: currentPage,
+        };
+        dispatch(userThunks.fetchUsers(params));
+    };
+
     if (loading) {
         return <div className={styles.container}>Загрузка...</div>;
     }
@@ -245,10 +303,22 @@ export const UsersPage = () => {
 
     return (
         <div className={styles.container}>
-            {/*<h2>Пользователи</h2>*/}
-            {transformedUsers && transformedUsers.length > 0 && (
-                <div>Всего пользователей: {pagination?.total ?? transformedUsers.length}</div>
-            )}
+            <div className={styles.headerRow}>
+                <div className={styles.headerInfo}>
+                    {transformedUsers && transformedUsers.length > 0 && (
+                        <div className={styles.userCount}>
+                            Всего пользователей: {pagination?.total ?? transformedUsers.length}
+                        </div>
+                    )}
+                </div>
+                <button
+                    className={styles.addButton}
+                    onClick={() => setIsCreateModalOpen(true)}
+                >
+                    Добавить сотрудника
+                </button>
+            </div>
+            
             <UserSearchForm />
             <UsersFilterForm
                 onApplyFilters={handleApplyFilters}
@@ -256,6 +326,12 @@ export const UsersPage = () => {
                 currentFilters={filters}
                 availableOptions={availableFilterOptions}
                 companyStructure={companyStructure || undefined}
+            />
+            
+            <CreateUserModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSuccess={handleUserCreated}
             />
             <table className={styles.table}>
                 <thead>
@@ -272,11 +348,11 @@ export const UsersPage = () => {
                     {filteredUsers.map((user) => (
                         <tr key={user.id} className={styles.row}>
                             <td className={styles.cell}>{user.fullName}</td>
-                            <td className={styles.cell}>{user.department}</td>
-                            <td className={styles.cell}>{user.position}</td>
-                            <td className={styles.cell}>{user.grade}</td>
-                            <td className={styles.cell}>{user.scheduleType}</td>
-                            <td className={styles.cell}>{user.shiftType}</td>
+                            <td className={styles.cell}>{user.departmentName}</td>
+                            <td className={styles.cell}>{user.positionName}</td>
+                            <td className={styles.cell}>{user.gradeLabel}</td>
+                            <td className={styles.cell}>{user.scheduleTypeLabel}</td>
+                            <td className={styles.cell}>{user.shiftTypeLabel}</td>
                         </tr>
                     ))}
                 </tbody>

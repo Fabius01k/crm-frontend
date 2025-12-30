@@ -1,11 +1,18 @@
+import type {
+  UserGrade,
+  WorkSchedule,
+  ShiftPreference,
+  UserRole,
+} from '@/common/enums/enums';
+
 export interface User {
     id: string;
     fullName: string;
     department: string | null;
     position: string | null;
-    grade: string | null;
-    workSchedule: string | null;
-    preferredShiftType: string | null;
+    grade: UserGrade | null;
+    workSchedule: WorkSchedule | null;
+    preferredShiftType: ShiftPreference | null;
     email?: string;
     firstName?: string;
     lastName?: string;
@@ -13,7 +20,7 @@ export interface User {
     birthDate?: string;
     phoneNumber?: string;
     tgLink?: string;
-    role?: string;
+    role?: UserRole;
 }
 
 export type UserPageDto = User
@@ -21,7 +28,7 @@ export type UserPageDto = User
 export interface UserProfileType {
     id: string;
     email: string;
-    role: string;
+    role: UserRole;
     isActive: boolean;
     createdAt: Date;
     profile: {
@@ -35,9 +42,9 @@ export interface UserProfileType {
     workInfo: {
         department: string | null;
         position: string | null;
-        grade: string | null;
-        workSchedule: string | null;
-        preferredShiftType: string | null;
+        grade: UserGrade | null;
+        workSchedule: WorkSchedule | null;
+        preferredShiftType: ShiftPreference | null;
     };
 }
 
@@ -50,10 +57,10 @@ export interface CreateUserDto {
     birthDate: string;
     phoneNumber?: string;
     tgLink?: string;
-    role?: string;
-    grade?: string;
-    preferredShiftType?: string;
-    workSchedule?: string;
+    role?: UserRole;
+    grade?: UserGrade;
+    preferredShiftType?: ShiftPreference;
+    workSchedule?: WorkSchedule;
     department?: string;
     position?: string;
 }
@@ -70,9 +77,9 @@ export interface UpdateUserProfileDto {
 export interface UpdateUserWorkInfoDto {
     department?: string;
     position?: string;
-    workSchedule?: string;
-    preferredShiftType?: string;
-    grade?: string;
+    workSchedule?: WorkSchedule;
+    preferredShiftType?: ShiftPreference;
+    grade?: UserGrade;
 }
 
 export interface ChangeOwnPasswordDto {

@@ -27,11 +27,11 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
     const [showPassword, setShowPassword] = React.useState(false)
 
     const togglePasswordVisibility = () => {
-        console.log('Toggle password visibility, current showPassword:', showPassword)
+        // console.log('Toggle password visibility, current showPassword:', showPassword)
         setShowPassword((prev) => !prev)
     }
 
-    console.log('Rendering PasswordInput, showPassword:', showPassword, 'type:', showPassword ? 'text' : 'password')
+    // console.log('Rendering PasswordInput, showPassword:', showPassword, 'type:', showPassword ? 'text' : 'password')
 
     return (
         <div className={`${styles.passwordInputContainer} ${className}`}>
@@ -46,7 +46,8 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
                 name={name}
                 className={styles.input}
             />
-            <button
+            {value.length > 0 && (
+                <button
                 type="button"
                 className={styles.toggleButton}
                 onClick={togglePasswordVisibility}
@@ -59,6 +60,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
                     className={styles.icon}
                 />
             </button>
+            )}
         </div>
     )
 }
