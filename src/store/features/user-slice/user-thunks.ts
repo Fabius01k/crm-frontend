@@ -10,6 +10,7 @@ import type {
     FindUsersDto,
     UsersResponse,
     UserPageDto,
+    UserProfileType,
     CompanyStructureResponse,
 } from "./user-types";
 
@@ -50,6 +51,21 @@ export const userThunks = {
         async (_, thunkAPI) => {
             try {
                 const response = await userAPI.getCurrentUserPage();
+                return response;
+            } catch (error) {
+                const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;
+                const errorMessage = axiosError.response?.data?.message || axiosError.message || 'Unknown error';
+                return thunkAPI.rejectWithValue(errorMessage);
+            }
+        }
+    ),
+
+    // Получить расширенный профиль текущего пользователя (с вложенными объектами)
+    fetchCurrentUserProfile: createAsyncThunk<UserProfileType, void, { rejectValue: string }>(
+        'users/fetchCurrentUserProfile',
+        async (_, thunkAPI) => {
+            try {
+                const response = await userAPI.getCurrentUserProfile();
                 return response;
             } catch (error) {
                 const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;

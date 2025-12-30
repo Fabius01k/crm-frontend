@@ -1,4 +1,7 @@
-import { useState, type ChangeEvent } from 'react';
+import { useState, type ChangeEvent, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch, RootState } from '@store/store';
+import { userThunks } from '@store/features/user-slice/user-thunks';
 
 import ava1 from "@assets/images/profile/ava-1.png"
 import ava2 from "@assets/images/profile/ava-2.png"
@@ -11,27 +14,90 @@ import styles from './profile-page.module.scss';
 
 const AVAILABLE_AVATARS = [ava1, ava2, ava3, ava4, ava5, ava6];
 
-export const ProfilePage = () => {
-    const [user, setUser] = useState({
-        surname: 'Smyth',
-        name: 'Jane',
-        patronymic: 'Non',
-        birthDate: '12.01.1993',
-        email: 'janesmit@gmail.com',
-        phone: '+123 456 7890',
-        socialLink: 'telegram/non',
-        department: 'Support',
-        position: 'Manager',
-        grade: 'Junior',
-        preferredShiftType: 'Non',
-        workDays: '15',
-        workHours: '120',
-        avatar: ava1
-    });
+// Тип для локального состояния пользователя (совместимый с UI)
+interface LocalUser {
+    surname: string;
+    name: string;
+    patronymic: string;
+    birthDate: string;
+    email: string;
+    phone: string;
+    socialLink: string;
+    department: string;
+    position: string;
+    grade: string;
+    preferredShiftType: string;
+    workDays: string;
+    workHours: string;
+    avatar: string;
+}
 
+// Преобразование данных из API в локальный формат
+const mapProfileToLocalUser = (profile: any): LocalUser => {
+    if (!profile) {
+        return {
+            surname: '',
+            name: '',
+            patronymic: '',
+            birthDate: '',
+            email: '',
+            phone: '',
+            socialLink: '',
+            department: '',
+            position: '',
+            grade: '',
+            preferredShiftType: '',
+            workDays: '15',
+            workHours: '120',
+            avatar: ava1
+        };
+    }
+
+    return {
+        surname: profile.profile?.lastName || '',
+        name: profile.profile?.firstName || '',
+        patronymic: profile.profile?.middleName || '',
+        birthDate: profile.profile?.birthDate
+            ? new Date(profile.profile.birthDate).toLocaleDateString('ru-RU')
+            : '',
+        email: profile.email || '',
+        phone: profile.profile?.phoneNumber || '',
+        socialLink: profile.profile?.tgLink || '',
+        department: profile.workInfo?.department || '',
+        position: profile.workInfo?.position || '',
+        grade: profile.workInfo?.grade || '',
+        preferredShiftType: profile.workInfo?.preferredShiftType || '',
+        workDays: '15', // Пока оставляем хардкод
+        workHours: '120', // Пока оставляем хардкод
+        avatar: ava1
+    };
+};
+
+export const ProfilePage = () => {
+    const dispatch = useDispatch<AppDispatch>();
+    const { currentUserProfile, loading, error } = useSelector((state: RootState) => state.user);
+
+    const [user, setUser] = useState<LocalUser>(() => mapProfileToLocalUser(currentUserProfile));
     const [isEditing, setIsEditing] = useState(false);
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
-    const [formData, setFormData] = useState({ ...user });
+    const [formData, setFormData] = useState<LocalUser>(() => ({ ...user }));
+
+    // Загрузка профиля при монтировании
+    useEffect(() => {
+        dispatch(userThunks.fetchCurrentUserProfile());
+    }, [dispatch]);
+
+    // Синхронизация локального состояния с данными из store
+    useEffect(() => {
+        if (currentUserProfile) {
+            const mappedUser = mapProfileToLocalUser(currentUserProfile);
+            setUser(mappedUser);
+            // Если не в режиме редактирования, обновляем formData
+            if (!isEditing) {
+                setFormData(mappedUser);
+            }
+        }
+    }, [currentUserProfile, isEditing]);
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -61,6 +127,26 @@ export const ProfilePage = () => {
         }
         setIsAvatarModalOpen(false);
     };
+
+    // Отображение состояния загрузки
+    if (loading && !currentUserProfile) {
+        return (
+            <div className={styles.container}>
+                <h2>Профиль пользователя</h2>
+                <div className={styles.loading}>Загрузка профиля...</div>
+            </div>
+        );
+    }
+
+    // Отображение ошибки
+    if (error && !currentUserProfile) {
+        return (
+            <div className={styles.container}>
+                <h2>Профиль пользователя</h2>
+                <div className={styles.error}>Ошибка загрузки профиля: {error}</div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.container}>

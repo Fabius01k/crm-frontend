@@ -18,6 +18,29 @@ export interface User {
 
 export type UserPageDto = User
 
+export interface UserProfileType {
+    id: string;
+    email: string;
+    role: string;
+    isActive: boolean;
+    createdAt: Date;
+    profile: {
+        firstName: string | null;
+        lastName: string | null;
+        middleName: string | null;
+        birthDate: Date | null;
+        phoneNumber: string | null;
+        tgLink: string | null;
+    };
+    workInfo: {
+        department: string | null;
+        position: string | null;
+        grade: string | null;
+        workSchedule: string | null;
+        preferredShiftType: string | null;
+    };
+}
+
 export interface CreateUserDto {
     email: string;
     password: string;
@@ -107,6 +130,7 @@ export interface CompanyStructureResponse {
 export interface UserSliceType {
     users: User[];
     currentUser: UserPageDto | null;
+    currentUserProfile: UserProfileType | null;
     companyStructure: CompanyStructureItem[] | null;
     loading: boolean;
     error: string | null;
@@ -122,6 +146,7 @@ export interface UserSliceType {
 export const userSliceInitialState: UserSliceType = {
     users: [],
     currentUser: null,
+    currentUserProfile: null,
     companyStructure: null,
     loading: false,
     error: null,

@@ -61,6 +61,22 @@ const userSlice = createSlice({
                 toast.error(state.error);
             });
 
+        // fetchCurrentUserProfile
+        builder
+            .addCase(userThunks.fetchCurrentUserProfile.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(userThunks.fetchCurrentUserProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                state.currentUserProfile = action.payload;
+            })
+            .addCase(userThunks.fetchCurrentUserProfile.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload ?? 'Ошибка загрузки профиля пользователя';
+                toast.error(state.error);
+            });
+
         // fetchUserPage
         builder
             .addCase(userThunks.fetchUserPage.pending, (state) => {

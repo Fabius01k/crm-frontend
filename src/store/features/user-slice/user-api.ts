@@ -8,6 +8,7 @@ import type {
     FindUsersDto,
     UsersResponse,
     UserPageDto,
+    UserProfileType,
     CompanyStructureResponse,
 } from "./user-types";
 
@@ -37,6 +38,12 @@ export const userAPI = {
     // GET /users/me/page (требует JWT)
     getCurrentUserPage: async (): Promise<UserPageDto> => {
         const response = await instance.get<UserPageDto>(`${userApiBaseURI}/me/page`);
+        return response.data;
+    },
+
+    // GET /users/me/profile (требует JWT) - расширенный профиль с вложенными объектами
+    getCurrentUserProfile: async (): Promise<UserProfileType> => {
+        const response = await instance.get<UserProfileType>(`${userApiBaseURI}/me/page`);
         return response.data;
     },
 
