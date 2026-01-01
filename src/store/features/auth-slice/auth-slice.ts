@@ -21,7 +21,7 @@ const authSlice = createSlice({
             })
             .addCase(authThunks.loginUser.fulfilled, (state, action) => {
                 state.loading = false;
-                console.log('loginUser.fulfilled payload:', action.payload);
+                // console.log('loginUser.fulfilled payload:', action.payload);
                 if (action.payload && action.payload.accessToken) {
                     const decoded = jwtDecode<JwtPayload>(action.payload.accessToken);
                     if (decoded.sub) {
