@@ -6,7 +6,6 @@ import Preloader from '@/components/preloader/preloader';
 import { useAppDispatch } from '@/store/store';
 
 export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
-    const dispatch = useAppDispatch()
     const [isChecking, setIsChecking] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const token = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN);

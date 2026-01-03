@@ -12,11 +12,11 @@ const AuthPage = () => {
     const dispatch = useDispatch<AppDispatch>()
     const { loading, error } = useSelector((state: RootState) => state.auth)
 
-    const userId = useSelector((state: RootState) => state.auth.user.id)
-    const username = useSelector((state: RootState) => state.auth.user.name)
-    const role = useSelector((state: RootState) => state.auth.user.role)
-    console.log('userId=', userId, 'username=', username);
-    console.log("role=", role);
+    // const userId = useSelector((state: RootState) => state.auth.user.id)
+    // const username = useSelector((state: RootState) => state.auth.user.name)
+    // const role = useSelector((state: RootState) => state.auth.user.role)
+    // console.log('userId=', userId, 'username=', username);
+    // console.log("role=", role);
     
     
 
