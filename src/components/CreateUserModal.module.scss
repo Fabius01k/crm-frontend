@@ -314,3 +314,14 @@
         box-shadow: 0 0 0 2px rgba(179, 201, 225, 0.5);
     }
 }
+
+.narrowFormGroup {
+    flex: 0 0 auto;
+    width: 50%;
+    max-width: 300px;
+    
+    @media (max-width: 768px) {
+        width: 100%;
+        max-width: none;
+    }
+}

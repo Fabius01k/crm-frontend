@@ -454,7 +454,7 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                             {errors.password && <span className={styles.errorText}>{errors.password}</span>}
                         </div>
 
-                        <div className={styles.formGroup}>
+                        <div className={`${styles.formGroup} ${styles.narrowFormGroup}`}>
                             <label htmlFor="role">Роль</label>
                             <select
                                 id="role"
