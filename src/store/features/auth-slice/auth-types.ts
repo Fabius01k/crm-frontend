@@ -1,10 +1,13 @@
-export type UserType = {
+export type UserRoleType = "teamlead" | "employee";
+
+export type AuthUserType = {
     id: string | null,
     name: string,
+    role: UserRoleType,
 }
 
 export interface AuthSliceType {
-    user: UserType,
+    user: AuthUserType,
 
     loading: boolean,
     error: string | null,
@@ -14,6 +17,7 @@ export const authSliceInitialState: AuthSliceType = {
     user: {
         id: null,
         name: "",
+        role: "employee",
     },
 
     loading: false,

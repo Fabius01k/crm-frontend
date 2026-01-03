@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { AxiosError } from 'axios';
 import { userAPI } from "./user-api";
+import { authSliceActions } from "../auth-slice/auth-slice";
 import type {
     CreateUserDto,
     UpdateUserProfileDto,
@@ -13,6 +14,7 @@ import type {
     UserProfileType,
     CompanyStructureResponse,
 } from "./user-types";
+import type { UserRoleType } from '../auth-slice/auth-types';
 
 export const userThunks = {
     // Получить список пользователей с фильтрацией
@@ -66,6 +68,14 @@ export const userThunks = {
         async (_, thunkAPI) => {
             try {
                 const response = await userAPI.getCurrentUserProfile();
+                // Диспатчим пользователя в auth-slice
+                thunkAPI.dispatch(authSliceActions.setUser({
+                    id: response.id,
+                    role: response.role as UserRoleType,
+                    name: response.profile.firstName && response.profile.lastName
+                        ? `${response.profile.firstName} ${response.profile.lastName}`
+                        : response.email
+                }));
                 return response;
             } catch (error) {
                 const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;

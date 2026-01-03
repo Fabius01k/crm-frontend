@@ -12,6 +12,15 @@ const AuthPage = () => {
     const dispatch = useDispatch<AppDispatch>()
     const { loading, error } = useSelector((state: RootState) => state.auth)
 
+    const userId = useSelector((state: RootState) => state.auth.user.id)
+    const username = useSelector((state: RootState) => state.auth.user.name)
+    const role = useSelector((state: RootState) => state.auth.user.role)
+    console.log('userId=', userId, 'username=', username);
+    console.log("role=", role);
+    
+    
+
+
     const [email, setEmail] = React.useState("")
     const [password, setPassword] = React.useState("")
     // const [rememberMe, setRememberMe] = React.useState(true)
@@ -58,6 +67,8 @@ const AuthPage = () => {
             </div>
             <form className={styles.authForm} onSubmit={handleSubmit}>
                 <h2>Авторизация</h2>
+
+
                 
                 {error && (
                     <div className={styles.errorMessage}>
