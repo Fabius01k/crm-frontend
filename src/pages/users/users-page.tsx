@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { UsersFilterForm } from './users-filter-form';
 import { UserSearchForm } from './user-search-form';
 import { CreateUserModal } from '@components/CreateUserModal';
+import Preloader from '@components/preloader/preloader';
 import styles from './users-page.module.scss';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { userThunks } from '@store/features/user-slice/user-thunks';
@@ -292,7 +293,11 @@ export const UsersPage = () => {
     };
 
     if (loading) {
-        return <div className={styles.container}>Загрузка...</div>;
+        return (
+            <div className={styles.container}>
+                <Preloader variant="fullscreen" text="Загрузка пользователей..." />
+            </div>
+        );
     }
 
     if (error) {

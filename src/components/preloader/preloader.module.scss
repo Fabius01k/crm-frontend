@@ -1,0 +1,105 @@
+// Прелоадер на весь экран
+.preloaderFullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(2px);
+}
+
+.fullscreenContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+// Встроенный прелоадер
+.preloaderInline {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+// Спиннер (общие стили)
+.spinner {
+  border-radius: 50%;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  animation: spin 1s linear infinite;
+}
+
+// Размеры для inline прелоадера
+.small {
+  .spinner {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .text {
+    font-size: 0.75rem;
+  }
+}
+
+.medium {
+  .spinner {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .text {
+    font-size: 0.875rem;
+  }
+}
+
+.large {
+  .spinner {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .text {
+    font-size: 1rem;
+  }
+}
+
+// Для fullscreen прелоадера используем больший размер спиннера
+.preloaderFullscreen {
+  .spinner {
+    width: 80px;
+    height: 80px;
+    border-width: 4px;
+  }
+  
+  .text {
+    font-size: 1.125rem;
+    color: #333;
+    font-weight: 500;
+  }
+}
+
+// Текст под прелоадером
+.text {
+  color: #666;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+// Анимация вращения
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

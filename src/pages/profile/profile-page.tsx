@@ -2,6 +2,7 @@ import { useState, type ChangeEvent, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '@store/store';
 import { userThunks } from '@store/features/user-slice/user-thunks';
+import Preloader from '@components/preloader/preloader';
 
 import ava1 from "@assets/images/profile/ava-1.png"
 import ava2 from "@assets/images/profile/ava-2.png"
@@ -133,7 +134,7 @@ export const ProfilePage = () => {
         return (
             <div className={styles.container}>
                 <h2>Профиль пользователя</h2>
-                <div className={styles.loading}>Загрузка профиля...</div>
+                <Preloader variant="inline" size="large" text="Загрузка профиля..." />
             </div>
         );
     }
