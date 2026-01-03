@@ -3,7 +3,7 @@ import { Navigate } from 'react-router';
 import { LOCAL_STORAGE_ACCESS_TOKEN } from '@constants/constants';
 import { instance } from '@api/instance';
 import Preloader from '@/components/preloader/preloader';
-import { useAppDispatch } from '@/store/store';
+// import { useAppDispatch } from '@/store/store';
 
 export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     const [isChecking, setIsChecking] = useState(true);

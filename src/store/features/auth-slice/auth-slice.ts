@@ -62,7 +62,7 @@ const authSlice = createSlice({
                     toast.error('Сессия истекла. Пожалуйста, войдите снова.');
                     localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN);
                     localStorage.removeItem(LOCAL_STORAGE_REFRESH_TOKEN);
-                    state.user = { id: null, name: "" };
+                    state.user = { id: null, name: "", role: "employee" };
                 }
             })
             // Добавляем обработку для logoutUser
@@ -72,7 +72,7 @@ const authSlice = createSlice({
             })
             .addCase(authThunks.logoutUser.fulfilled, (state) => {
                 state.loading = false;
-                state.user = { id: null, name: "" };
+                state.user = { id: null, name: "", role: "employee"};
                 // Очищаем localStorage при выходе
                 localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN);
                 localStorage.removeItem(LOCAL_STORAGE_REFRESH_TOKEN);
