@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, useEffect } from 'react';
+import { useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '@store/store';
 import { userThunks } from '@store/features/user-slice/user-thunks';
@@ -6,7 +7,7 @@ import Preloader from '@components/preloader/preloader';
 import { ProfileView, type ProfileUser } from '@components/profile-view/profile-view';
 
 import ava1 from "@assets/images/profile/ava-1.png"
-import styles from './profile-page.module.scss';
+import styles from './user-profile-page.module.scss';
 
 // Преобразование данных из API в локальный формат
 const mapProfileToLocalUser = (profile: any): ProfileUser => {
@@ -49,31 +50,37 @@ const mapProfileToLocalUser = (profile: any): ProfileUser => {
     };
 };
 
-export const ProfilePage = () => {
+export const UserProfilePage = () => {
+    const { id } = useParams<{ id: string }>();
     const dispatch = useDispatch<AppDispatch>();
-    const { currentUserProfile, loading, error } = useSelector((state: RootState) => state.user);
+    const { users, loading, error } = useSelector((state: RootState) => state.user);
 
-    const [user, setUser] = useState<ProfileUser>(() => mapProfileToLocalUser(currentUserProfile));
+    // Найти пользователя в списке users или загрузить по ID
+    const userFromStore = users.find(u => u.id === id);
+    
+    const [user, setUser] = useState<ProfileUser>(() => mapProfileToLocalUser(userFromStore));
     const [isEditing, setIsEditing] = useState(false);
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
     const [formData, setFormData] = useState<ProfileUser>(() => ({ ...user }));
 
-    // Загрузка профиля при монтировании
+    // Загрузка профиля пользователя по ID
     useEffect(() => {
-        dispatch(userThunks.fetchCurrentUserProfile());
-    }, [dispatch]);
+        if (id) {
+            dispatch(userThunks.fetchUserPage(id));
+        }
+    }, [dispatch, id]);
 
     // Синхронизация локального состояния с данными из store
     useEffect(() => {
-        if (currentUserProfile) {
-            const mappedUser = mapProfileToLocalUser(currentUserProfile);
+        if (userFromStore) {
+            const mappedUser = mapProfileToLocalUser(userFromStore);
             setUser(mappedUser);
             // Если не в режиме редактирования, обновляем formData
             if (!isEditing) {
                 setFormData(mappedUser);
             }
         }
-    }, [currentUserProfile, isEditing]);
+    }, [userFromStore, isEditing]);
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -113,7 +120,7 @@ export const ProfilePage = () => {
     };
 
     // Отображение состояния загрузки
-    if (loading && !currentUserProfile) {
+    if (loading && !userFromStore) {
         return (
             <div className={styles.container}>
                 <h2>Профиль пользователя</h2>
@@ -123,7 +130,7 @@ export const ProfilePage = () => {
     }
 
     // Отображение ошибки
-    if (error && !currentUserProfile) {
+    if (error && !userFromStore) {
         return (
             <div className={styles.container}>
                 <h2>Профиль пользователя</h2>

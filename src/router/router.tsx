@@ -3,6 +3,7 @@ import { PATHS } from "@router/paths";
 import AuthPage from "@pages/auth/auth-page";
 import { UsersPage } from "@/pages/users/users-page";
 import { ProfilePage } from "@/pages/profile/profile-page";
+import { UserProfilePage } from "@/pages/user-profile/user-profile-page";
 import { Layout } from "@/pages/layout/layout";
 import { ProtectedRoute } from "./protectedRoute";
 import { AuthRoute } from "./auth-route";
@@ -38,6 +39,10 @@ const routerConfig = [
       {
         path: PATHS.profile,
         element: <ProfilePage />
+      },
+      {
+        path: "/users/:id",
+        element: <UserProfilePage />
       },
     ]
   },

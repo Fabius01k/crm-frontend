@@ -44,6 +44,7 @@
     font-size: 14.74px;
     line-height: 100%;
     letter-spacing: 0;
+    cursor: pointer;
 
     &:nth-child(even) {
         background-color: #B3C9E11F;
@@ -51,6 +52,10 @@
 
     &:nth-child(odd) {
         background-color: transparent;
+    }
+
+    &:hover {
+        background-color: #E8EFF7;
     }
 }
 

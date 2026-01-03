@@ -292,6 +292,12 @@ export const UsersPage = () => {
         dispatch(userThunks.fetchUsers(params));
     };
 
+    // Обработчик клика на строку таблицы
+    const handleRowClick = (userId: string) => {
+        // Открываем профиль пользователя в новой вкладке
+        window.open(`/users/${userId}`, '_blank');
+    };
+
     if (loading) {
         return (
             <div className={styles.container}>
@@ -351,7 +357,11 @@ export const UsersPage = () => {
                 </thead>
                 <tbody>
                     {filteredUsers.map((user) => (
-                        <tr key={user.id} className={styles.row}>
+                        <tr
+                            key={user.id}
+                            className={styles.row}
+                            onClick={() => handleRowClick(user.id)}
+                        >
                             <td className={styles.cell}>{user.fullName}</td>
                             <td className={styles.cell}>{user.departmentName}</td>
                             <td className={styles.cell}>{user.positionName}</td>
