@@ -116,6 +116,38 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
         return Object.keys(newErrors).length === 0;
     };
 
+    const generateStrongPassword = () => {
+        const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const digits = '0123456789';
+        const allChars = lowercase + uppercase + digits;
+        
+        let password = '';
+        // Гарантируем наличие хотя бы одного символа каждого типа
+        password += lowercase[Math.floor(Math.random() * lowercase.length)];
+        password += uppercase[Math.floor(Math.random() * uppercase.length)];
+        password += digits[Math.floor(Math.random() * digits.length)];
+        
+        // Дополняем до 12 символов случайными символами из всех категорий
+        for (let i = 0; i < 9; i++) {
+            password += allChars[Math.floor(Math.random() * allChars.length)];
+        }
+        
+        // Перемешиваем символы
+        password = password.split('').sort(() => Math.random() - 0.5).join('');
+        
+        return password;
+    };
+
+    const handleGeneratePassword = () => {
+        const newPassword = generateStrongPassword();
+        setFormData(prev => ({ ...prev, password: newPassword }));
+        // Очищаем ошибку пароля, если она была
+        if (errors.password) {
+            setErrors(prev => ({ ...prev, password: '' }));
+        }
+    };
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         
@@ -239,7 +271,42 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                                 {errors.lastName && <span className={styles.errorText}>{errors.lastName}</span>}
                             </div>
                         </div>
+
+                        <div className={styles.formGroup}>
+                            <label htmlFor="middleName">Отчество</label>
+                            <input
+                                type="text"
+                                id="middleName"
+                                name="middleName"
+                                value={formData.middleName}
+                                onChange={handleInputChange}
+                                placeholder="Введите отчество"
+                            />
+                        </div>
                         
+                        <div className={styles.formGroup}>
+                            <label htmlFor="birthDate">Дата рождения</label>
+                            <input
+                                type="date"
+                                id="birthDate"
+                                name="birthDate"
+                                value={formData.birthDate}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                        
+                        <div className={styles.formGroup}>
+                            <label htmlFor="phoneNumber">Телефон</label>
+                            <input
+                                type="tel"
+                                id="phoneNumber"
+                                name="phoneNumber"
+                                value={formData.phoneNumber}
+                                onChange={handleInputChange}
+                                placeholder="+7 (XXX) XXX-XX-XX"
+                            />
+                        </div>
+
                         <div className={styles.formGroup}>
                             <label htmlFor="email">Email *</label>
                             <input
@@ -252,18 +319,6 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                                 placeholder="example@company.com"
                             />
                             {errors.email && <span className={styles.errorText}>{errors.email}</span>}
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="phoneNumber">Телефон</label>
-                            <input
-                                type="tel"
-                                id="phoneNumber"
-                                name="phoneNumber"
-                                value={formData.phoneNumber}
-                                onChange={handleInputChange}
-                                placeholder="+7 (XXX) XXX-XX-XX"
-                            />
                         </div>
                     </div>
 
@@ -376,15 +431,26 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                         <h4 className={styles.sectionTitle}>Другое</h4>
                         <div className={styles.formGroup}>
                             <label htmlFor="password">Пароль *</label>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleInputChange}
-                                className={errors.password ? styles.inputError : ''}
-                                placeholder="Введите пароль"
-                            />
+                            <div className={styles.passwordInputWrapper}>
+                                <input
+                                    // type="password"
+                                    type="text"
+                                    id="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleInputChange}
+                                    className={errors.password ? styles.inputError : ''}
+                                    placeholder="Введите пароль"
+                                />
+                                <button
+                                    type="button"
+                                    className={styles.generatePasswordButton}
+                                    onClick={handleGeneratePassword}
+                                    title="Сгенерировать надежный пароль"
+                                >
+                                    🔐
+                                </button>
+                            </div>
                             {errors.password && <span className={styles.errorText}>{errors.password}</span>}
                         </div>
 
@@ -402,29 +468,6 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                                     </option>
                                 ))}
                             </select>
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="birthDate">Дата рождения</label>
-                            <input
-                                type="date"
-                                id="birthDate"
-                                name="birthDate"
-                                value={formData.birthDate}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="middleName">Отчество</label>
-                            <input
-                                type="text"
-                                id="middleName"
-                                name="middleName"
-                                value={formData.middleName}
-                                onChange={handleInputChange}
-                                placeholder="Введите отчество"
-                            />
                         </div>
 
                         <div className={styles.formGroup}>

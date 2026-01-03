@@ -269,3 +269,48 @@
     flex-direction: column;
     gap: 10px;
 }
+
+.passwordInputWrapper {
+    position: relative;
+    display: flex;
+    width: 100%;
+}
+
+.passwordInputWrapper input {
+    flex: 1;
+    padding-right: 50px; // Место для кнопки
+}
+
+.generatePasswordButton {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    color: #666;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+
+    &:hover {
+        background-color: #f8f9fa;
+        color: #222;
+    }
+
+    &:active {
+        background-color: #e9ecef;
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(179, 201, 225, 0.5);
+    }
+}
