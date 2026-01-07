@@ -76,6 +76,14 @@
     position: relative;
   }
 
+  &__divider {
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.1);
+    // margin: 0.25rem 0;
+    margin: 50px 0;
+    width: 100%;
+  }
+
   &__link {
     color: black;
     font-family: 'Inter', sans-serif;

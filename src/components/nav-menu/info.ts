@@ -12,7 +12,7 @@ export type NavMenuType = {
     img?: string,
 }
 
-export const adminNavMenuItems: NavMenuType[] = [
+export const navMenuItems: NavMenuType[] = [
     {
         index: 0,
         title: "Авторизация",
@@ -27,14 +27,17 @@ export const adminNavMenuItems: NavMenuType[] = [
     },
     {
         index: 2,
-        title: "Пользователи",
-        link: PATHS.users,
-        img: usersIcon,
-    },
-    {
-        index: 3,
         title: "Профиль",
         link: PATHS.profile,
         img: calendarIcon,
+    },
+]
+
+export const adminNavMenuItems: NavMenuType[] = [
+    {
+        index: 21,
+        title: "Пользователи",
+        link: PATHS.users,
+        img: usersIcon,
     },
 ]
