@@ -73,6 +73,9 @@ export const ProfileView = ({
         }
     };
 
+    console.log('onAvatarClick=', onAvatarClick);
+    
+
     return (
         <div className={styles.container}>
 
