@@ -1,6 +1,16 @@
 import { type ChangeEvent } from 'react';
 import styles from './profile-view.module.scss';
 
+// Импорты для нормализованных названий
+import {
+  UserGradeEnum,
+  ShiftPreferenceEnum,
+  UserGradeLabels,
+  ShiftPreferenceLabels,
+  getLabel,
+} from '@/common/enums/enums';
+import type { CompanyStructureItem } from '@store/features/user-slice/user-types';
+
 // Импортируем аватары из оригинального файла
 import ava1 from "@assets/images/profile/ava-1.png"
 import ava2 from "@assets/images/profile/ava-2.png"
@@ -37,6 +47,12 @@ export interface ProfileViewProps {
     isEditing: boolean;
     // Данные формы при редактировании
     formData: ProfileUser;
+    // Структура компании для нормализации названий отделов и позиций
+    companyStructure?: CompanyStructureItem[] | null;
+    // Это свой профиль или профиль другого пользователя
+    isOwnProfile?: boolean;
+    // Роль текущего пользователя (для определения прав)
+    currentUserRole?: string;
     // Колбэки
     onInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
     onSave: () => void;
@@ -54,6 +70,9 @@ export const ProfileView = ({
     user,
     isEditing,
     formData,
+    companyStructure,
+    // isOwnProfile = false,
+    currentUserRole,
     onInputChange,
     onSave,
     onCancel,
@@ -67,6 +86,33 @@ export const ProfileView = ({
     const isBlocked = false;
     const blockedLable: string = !isBlocked ? 'Заблокировать профиль' : 'Разблокировать профиль';
 
+    // Вспомогательные функции для получения нормализованных названий
+    const getDepartmentName = (code: string): string => {
+        if (!code) return '';
+        if (!companyStructure) return code;
+        const dept = companyStructure.find(d => d.code === code);
+        return dept?.name || code;
+    };
+
+    const getPositionName = (code: string): string => {
+        if (!code) return '';
+        if (!companyStructure) return code;
+        // Ищем позицию во всех отделах
+        for (const dept of companyStructure) {
+            const position = dept.positions.find(p => p.code === code);
+            if (position) return position.name;
+        }
+        return code;
+    };
+
+    const getGradeLabel = (code: string): string => {
+        return getLabel(code, UserGradeLabels);
+    };
+
+    const getShiftTypeLabel = (code: string): string => {
+        return getLabel(code, ShiftPreferenceLabels);
+    };
+
     const handleBlockToggle = () => {
         if (onBlockUser) {
             onBlockUser(!isBlocked);
@@ -74,6 +120,11 @@ export const ProfileView = ({
     };
 
     console.log('onAvatarClick=', onAvatarClick);
+    
+    // Определяем, нужно ли показывать кнопки редактирования и блокировки
+    // const shouldShowActionButtons = !isOwnProfile || currentUserRole === 'teamlead';
+    const shouldShowActionButtons = currentUserRole === 'teamlead';
+    console.log('currentUserRole=', currentUserRole);
     
 
     return (
@@ -91,12 +142,12 @@ export const ProfileView = ({
                             <button className={styles.saveButton} onClick={onSave}>Сохранить</button>
                             <button className={styles.cancelButton} onClick={onCancel}>Отмена</button>
                         </>
-                    ) : (
+                    ) : shouldShowActionButtons ? (
                         <>
                             <button className={styles.editButton} onClick={onEditToggle}>Редактировать профиль</button>
                             <button className={styles.blockButton} onClick={handleBlockToggle}>{blockedLable}</button>
                         </>
-                    )}
+                    ) : null}
                 </div>
             </div>
             
@@ -193,46 +244,76 @@ export const ProfileView = ({
                             <div className={styles.editForm}>
                                 <div className={styles.formGroup}>
                                     <label>Отдел</label>
-                                    <input name="department" value={formData.department} onChange={onInputChange} />
+                                    <select name="department" value={formData.department} onChange={onInputChange}>
+                                        <option value="">Выберите отдел</option>
+                                        {companyStructure?.map(dept => (
+                                            <option key={dept.code} value={dept.code}>
+                                                {dept.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className={styles.formGroup}>
                                     <label>Позиция</label>
-                                    <input name="position" value={formData.position} onChange={onInputChange} />
+                                    <select name="position" value={formData.position} onChange={onInputChange}>
+                                        <option value="">Выберите позицию</option>
+                                        {companyStructure?.flatMap(dept =>
+                                            dept.positions.map(pos => (
+                                                <option key={pos.code} value={pos.code}>
+                                                    {pos.name}
+                                                </option>
+                                            ))
+                                        )}
+                                    </select>
                                 </div>
                                 <div className={styles.formGroup}>
                                     <label>Grade</label>
-                                    <input name="grade" value={formData.grade} onChange={onInputChange} />
+                                    <select name="grade" value={formData.grade} onChange={onInputChange}>
+                                        <option value="">Выберите грейд</option>
+                                        {Object.entries(UserGradeEnum).map(([_, value]) => (
+                                            <option key={value} value={value}>
+                                                {getLabel(value, UserGradeLabels)}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className={styles.formGroup}>
                                     <label>Предпочтительный тип смены</label>
-                                    <input name="preferredShiftType" value={formData.preferredShiftType} onChange={onInputChange} />
+                                    <select name="preferredShiftType" value={formData.preferredShiftType} onChange={onInputChange}>
+                                        <option value="">Выберите тип смены</option>
+                                        {Object.entries(ShiftPreferenceEnum).map(([_, value]) => (
+                                            <option key={value} value={value}>
+                                                {getLabel(value, ShiftPreferenceLabels)}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className={styles.formGroup}>
                                     <label>Рабочих дней в месяце</label>
-                                    <input name="workDays" value={formData.workDays} onChange={onInputChange} />
+                                    <input name="workDays" value={formData.workDays} onChange={onInputChange} disabled />
                                 </div>
                                 <div className={styles.formGroup}>
                                     <label>Рабочих часов в месяце</label>
-                                    <input name="workHours" value={formData.workHours} onChange={onInputChange} />
+                                    <input name="workHours" value={formData.workHours} onChange={onInputChange} disabled />
                                 </div>
                             </div>
                         ) : (
                             <div className={styles.infoList}>
                                 <div className={styles.infoItem}>
                                     <span className={styles.label}>Отдел</span>
-                                    <span className={styles.value}>{user.department}</span>
+                                    <span className={styles.value}>{getDepartmentName(user.department)}</span>
                                 </div>
                                 <div className={styles.infoItem}>
                                     <span className={styles.label}>Позиция</span>
-                                    <span className={styles.value}>{user.position}</span>
+                                    <span className={styles.value}>{getPositionName(user.position)}</span>
                                 </div>
                                 <div className={styles.infoItem}>
                                     <span className={styles.label}>Grade</span>
-                                    <span className={styles.value}>{user.grade}</span>
+                                    <span className={styles.value}>{getGradeLabel(user.grade)}</span>
                                 </div>
                                 <div className={styles.infoItem}>
                                     <span className={styles.label}>Предпочтительный тип смены</span>
-                                    <span className={styles.value}>{user.preferredShiftType}</span>
+                                    <span className={styles.value}>{getShiftTypeLabel(user.preferredShiftType)}</span>
                                 </div>
                                 <div className={styles.infoItem}>
                                     <span className={styles.label}>Рабочих дней в месяце</span>

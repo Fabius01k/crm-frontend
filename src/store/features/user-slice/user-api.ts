@@ -36,10 +36,10 @@ export const userAPI = {
     },
 
     // GET /users/me/page (требует JWT)
-    getCurrentUserPage: async (): Promise<UserPageDto> => {
-        const response = await instance.get<UserPageDto>(`${userApiBaseURI}/me/page`);
-        return response.data;
-    },
+    // getCurrentUserPage: async (): Promise<UserPageDto> => {
+    //     const response = await instance.get<UserPageDto>(`${userApiBaseURI}/me/page`);
+    //     return response.data;
+    // },
 
     // GET /users/me/profile (требует JWT) - расширенный профиль с вложенными объектами
     getCurrentUserProfile: async (): Promise<UserProfileType> => {

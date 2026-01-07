@@ -15,6 +15,7 @@ import type {
     CompanyStructureResponse,
 } from "./user-types";
 import type { UserRoleType } from '../auth-slice/auth-types';
+// import { userActs } from './user-actions';
 
 export const userThunks = {
     // Получить список пользователей с фильтрацией
@@ -48,19 +49,19 @@ export const userThunks = {
     ),
 
     // Получить текущего пользователя (страница)
-    fetchCurrentUserPage: createAsyncThunk<UserPageDto, void, { rejectValue: string }>(
-        'users/fetchCurrentUserPage',
-        async (_, thunkAPI) => {
-            try {
-                const response = await userAPI.getCurrentUserPage();
-                return response;
-            } catch (error) {
-                const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;
-                const errorMessage = axiosError.response?.data?.message || axiosError.message || 'Unknown error';
-                return thunkAPI.rejectWithValue(errorMessage);
-            }
-        }
-    ),
+    // fetchCurrentUserPage: createAsyncThunk<UserPageDto, void, { rejectValue: string }>(
+    //     'users/fetchCurrentUserPage',
+    //     async (_, thunkAPI) => {
+    //         try {
+    //             const response = await userAPI.getCurrentUserPage();
+    //             return response;
+    //         } catch (error) {
+    //             const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;
+    //             const errorMessage = axiosError.response?.data?.message || axiosError.message || 'Unknown error';
+    //             return thunkAPI.rejectWithValue(errorMessage);
+    //         }
+    //     }
+    // ),
 
     // Получить расширенный профиль текущего пользователя (с вложенными объектами)
     fetchCurrentUserProfile: createAsyncThunk<UserProfileType, void, { rejectValue: string }>(
@@ -68,14 +69,16 @@ export const userThunks = {
         async (_, thunkAPI) => {
             try {
                 const response = await userAPI.getCurrentUserProfile();
-                // Диспатчим пользователя в auth-slice
-                thunkAPI.dispatch(authSliceActions.setUser({
+                const user = {
                     id: response.id,
                     role: response.role as UserRoleType,
                     name: response.profile.firstName && response.profile.lastName
                         ? `${response.profile.firstName} ${response.profile.lastName}`
                         : response.email
-                }));
+                }
+                // Диспатчим пользователя в auth-slice
+                thunkAPI.dispatch(authSliceActions.setUser(user));
+                // thunkAPI.dispatch(userActs.setCurrentUser(response))
                 return response;
             } catch (error) {
                 const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;

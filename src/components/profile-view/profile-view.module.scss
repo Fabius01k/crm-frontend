@@ -1,3 +1,5 @@
+@use '@assets/styles/_forms.scss' as *;
+
 .container {
     padding: 24px;
     // max-width: 1200px;
@@ -134,28 +136,21 @@
 }
 
 .formGroup {
-    display: flex;
-    flex-direction: column;
+    @include form-group;
     gap: 8px;
 }
 
 .formGroup label {
-    font-size: 14px;
-    color: #666;
+    @include form-label;
     font-weight: 500;
 }
 
 .formGroup input {
-    padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: border 0.2s;
+    @include form-input;
+}
 
-    &:focus {
-        outline: none;
-        border-color: #007bff;
-    }
+.formGroup select {
+    @include form-select;
 }
 
 .workImageContainer {

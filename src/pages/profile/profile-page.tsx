@@ -51,12 +51,20 @@ const mapProfileToLocalUser = (profile: any): ProfileUser => {
 
 export const ProfilePage = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { currentUserProfile, loading, error } = useSelector((state: RootState) => state.user);
+    const { currentUserProfile, loading, error, companyStructure } = useSelector((state: RootState) => state.user);
+    const { user: authUser } = useSelector((state: RootState) => state.auth);
 
     const [user, setUser] = useState<ProfileUser>(() => mapProfileToLocalUser(currentUserProfile));
     const [isEditing, setIsEditing] = useState(false);
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
     const [formData, setFormData] = useState<ProfileUser>(() => ({ ...user }));
+
+    // Загрузка структуры компании, если её нет
+    useEffect(() => {
+        if (!companyStructure) {
+            dispatch(userThunks.fetchCompanyStructure());
+        }
+    }, [dispatch, companyStructure]);
 
     // Загрузка профиля при монтировании
     useEffect(() => {
@@ -137,6 +145,9 @@ export const ProfilePage = () => {
             user={user}
             isEditing={isEditing}
             formData={formData}
+            companyStructure={companyStructure}
+            isOwnProfile={true}
+            currentUserRole={authUser.role}
             onInputChange={handleInputChange}
             onSave={handleSave}
             onCancel={handleCancel}

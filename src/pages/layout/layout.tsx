@@ -17,7 +17,7 @@ export const Layout = () => {
             // Можно сделать запрос для проверки токена
             // Если токен невалиден, интерцептор попытается обновить его
             // или редиректнет на /auth
-            dispatch(userThunks.fetchCurrentUserPage())
+            dispatch(userThunks.fetchCurrentUserProfile())
         }
     }, []);
     

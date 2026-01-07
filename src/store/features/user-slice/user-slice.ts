@@ -46,20 +46,20 @@ const userSlice = createSlice({
             });
 
         // fetchCurrentUserPage
-        builder
-            .addCase(userThunks.fetchCurrentUserPage.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(userThunks.fetchCurrentUserPage.fulfilled, (state, action) => {
-                state.loading = false;
-                state.currentUser = action.payload;
-            })
-            .addCase(userThunks.fetchCurrentUserPage.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload ?? 'Ошибка загрузки текущего пользователя';
-                toast.error(state.error);
-            });
+        // builder
+        //     .addCase(userThunks.fetchCurrentUserPage.pending, (state) => {
+        //         state.loading = true;
+        //         state.error = null;
+        //     })
+        //     .addCase(userThunks.fetchCurrentUserPage.fulfilled, (state, action) => {
+        //         state.loading = false;
+        //         state.currentUser = action.payload;
+        //     })
+        //     .addCase(userThunks.fetchCurrentUserPage.rejected, (state, action) => {
+        //         state.loading = false;
+        //         state.error = action.payload ?? 'Ошибка загрузки текущего пользователя';
+        //         toast.error(state.error);
+        //     });
 
         // fetchCurrentUserProfile
         builder
@@ -85,13 +85,16 @@ const userSlice = createSlice({
             })
             .addCase(userThunks.fetchUserPage.fulfilled, (state, action) => {
                 state.loading = false;
+                state.currentUser = action.payload;
                 // Обновляем или добавляем пользователя в список
-                const index = state.users.findIndex(u => u.id === action.payload.id);
-                if (index !== -1) {
-                    state.users[index] = action.payload;
-                } else {
-                    state.users.push(action.payload);
-                }
+                // const index = state.users.findIndex(u => u.id === action.payload.id);
+                // if (index !== -1) {
+                //     state.users[index] = action.payload;
+                // } else {
+                //     state.users.push(action.payload);
+                // }
+                // state.currentUserProfile = action.payload;
+
             })
             .addCase(userThunks.fetchUserPage.rejected, (state, action) => {
                 state.loading = false;
