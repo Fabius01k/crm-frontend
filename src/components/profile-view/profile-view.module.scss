@@ -4,11 +4,24 @@
     //margin: 0 auto;
 }
 
-h2 {
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 32px;
-    color: #1a1a1a;
+.titleContent {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 25px;
+
+    h2 {
+        font-size: 28px;
+        font-weight: 600;
+        // margin-bottom: 32px;
+        margin: 0;
+        color: #1a1a1a;
+    }
+
+    p {
+        margin: 0;
+    }
+    
 }
 
 .profileContent {
@@ -158,14 +171,15 @@ h2 {
 }
 
 .actions {
-    margin-top: 32px;
+    // margin-top: 32px;
     display: flex;
     gap: 16px;
     justify-content: flex-end;
 }
 
-.editButton, .saveButton, .cancelButton {
-    padding: 12px 24px;
+.editButton, .saveButton, .cancelButton, .blockButton {
+    height: 40px;
+    // padding: 10px 24px;
     border-radius: 6px;
     font-size: 14px;
     font-weight: 500;
@@ -198,6 +212,16 @@ h2 {
 
     &:hover {
         background: #545b62;
+    }
+}
+
+.blockButton {
+    background-color: transparent;
+    color: red;
+    border: 1px solid red;
+
+    &:hover {
+        background: rgb(202, 136, 136);
     }
 }
 

@@ -44,6 +44,7 @@ export interface ProfileViewProps {
     onEditToggle: () => void;
     onAvatarClick: () => void;
     onAvatarSelect: (avatar: string) => void;
+    onBlockUser?: (newStatus: boolean) => void;
     // Состояние модального окна аватара
     isAvatarModalOpen: boolean;
     onAvatarModalClose: () => void;
@@ -58,17 +59,47 @@ export const ProfileView = ({
     onCancel,
     onEditToggle,
     onAvatarClick,
+    onBlockUser,
     onAvatarSelect,
     isAvatarModalOpen,
     onAvatarModalClose
 }: ProfileViewProps) => {
+    const isBlocked = false;
+    const blockedLable: string = !isBlocked ? 'Заблокировать профиль' : 'Разблокировать профиль';
+
+    const handleBlockToggle = () => {
+        if (onBlockUser) {
+            onBlockUser(!isBlocked);
+        }
+    };
+
     return (
         <div className={styles.container}>
-            <h2>Профиль пользователя</h2>
+
+            <div className={styles.profileContent}>
+                <div className={styles.titleContent}>
+                    <h2>Личная информация</h2>
+                    <p>Персональные и рабочие данные сотрудника</p>
+                </div>
+
+                <div className={styles.actions}>
+                    {isEditing ? (
+                        <>
+                            <button className={styles.saveButton} onClick={onSave}>Сохранить</button>
+                            <button className={styles.cancelButton} onClick={onCancel}>Отмена</button>
+                        </>
+                    ) : (
+                        <>
+                            <button className={styles.editButton} onClick={onEditToggle}>Редактировать профиль</button>
+                            <button className={styles.blockButton} onClick={handleBlockToggle}>{blockedLable}</button>
+                        </>
+                    )}
+                </div>
+            </div>
             
             <div className={styles.profileContent}>
                 <div className={styles.column}>
-                    <div className={styles.avatarSection}>
+                    {/* <div className={styles.avatarSection}>
                         <div 
                             className={styles.avatar}
                             onClick={onAvatarClick}
@@ -82,7 +113,7 @@ export const ProfileView = ({
                                 {isEditing ? 'Изменить' : ''}
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
                     <div className={styles.card}>
                         <h3>General information</h3>
@@ -216,17 +247,6 @@ export const ProfileView = ({
                         <img src={workImage} alt="Work" className={styles.workImage} />
                     </div>
                 </div>
-            </div>
-
-            <div className={styles.actions}>
-                {isEditing ? (
-                    <>
-                        <button className={styles.saveButton} onClick={onSave}>Сохранить</button>
-                        <button className={styles.cancelButton} onClick={onCancel}>Отмена</button>
-                    </>
-                ) : (
-                    <button className={styles.editButton} onClick={onEditToggle}>Редактировать профиль</button>
-                )}
             </div>
 
             {isAvatarModalOpen && (

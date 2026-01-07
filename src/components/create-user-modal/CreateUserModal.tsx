@@ -15,6 +15,8 @@ import {
 } from '@/common/enums/enums';
 import styles from './CreateUserModal.module.scss';
 
+import createPassImage from '@assets/icons/create-password/create-pass-image.png';
+
 interface CreateUserModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -448,7 +450,7 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                                     onClick={handleGeneratePassword}
                                     title="Сгенерировать надежный пароль"
                                 >
-                                    🔐
+                                    <img alt="" src={createPassImage} />
                                 </button>
                             </div>
                             {errors.password && <span className={styles.errorText}>{errors.password}</span>}

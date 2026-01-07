@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { UsersFilterForm } from './users-filter-form';
 import { UserSearchForm } from './user-search-form';
-import { CreateUserModal } from '@components/CreateUserModal';
+import { CreateUserModal } from '@/components/create-user-modal/CreateUserModal';
 import Preloader from '@components/preloader/preloader';
 import styles from './users-page.module.scss';
 import { useAppDispatch, useAppSelector } from '@store/store';

@@ -4,7 +4,7 @@ import type { AppDispatch, RootState } from "@store/store"
 import { authThunks } from "@store/features/auth-slice/auth-thunks"
 import { authSliceActions } from "@store/features/auth-slice/auth-slice"
 import authImage from "@assets/images/auth/auth-image-2.png"
-import PasswordInput from "@components/PasswordInput"
+import PasswordInput from "@/components/password-input/PasswordInput"
 
 import styles from "./auth-page.module.scss"
 
