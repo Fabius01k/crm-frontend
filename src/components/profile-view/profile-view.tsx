@@ -1,15 +1,36 @@
 import { type ChangeEvent } from 'react';
 import styles from './profile-view.module.scss';
+import type { CompanyStructureResponse } from '@store/features/user-slice/user-types';
 
-// Импорты для нормализованных названий
-import {
-  UserGradeEnum,
-  ShiftPreferenceEnum,
-  UserGradeLabels,
-  ShiftPreferenceLabels,
-  getLabel,
-} from '@/common/enums/enums';
-import type { CompanyStructureItem } from '@store/features/user-slice/user-types';
+// Локальные константы для графиков и смен (статические, не из API)
+const WORK_SCHEDULE = {
+  DEFAULT: 'default',
+  SHIFT_SCHEDULE: 'shift_schedule',
+} as const;
+
+const SHIFT_PREFERENCE = {
+  MORNING: 'morning',
+  DAY: 'day',
+  NIGHT: 'night',
+  MIXED: 'mixed',
+} as const;
+
+const WORK_SCHEDULE_LABELS: Record<string, string> = {
+  [WORK_SCHEDULE.DEFAULT]: 'Стандартный',
+  [WORK_SCHEDULE.SHIFT_SCHEDULE]: 'Сменный',
+};
+
+const SHIFT_PREFERENCE_LABELS: Record<string, string> = {
+  [SHIFT_PREFERENCE.MORNING]: 'Утренняя',
+  [SHIFT_PREFERENCE.DAY]: 'Дневная',
+  [SHIFT_PREFERENCE.NIGHT]: 'Ночная',
+  [SHIFT_PREFERENCE.MIXED]: 'Любая',
+};
+
+// Вспомогательная функция для получения русскоязычного названия
+function getLabel(value: string, labels: Record<string, string>): string {
+  return labels[value] || value;
+}
 
 // Импортируем аватары из оригинального файла
 import ava1 from "@assets/images/profile/ava-1.png"
@@ -34,6 +55,7 @@ export interface ProfileUser {
     department: string;
     position: string;
     grade: string;
+    workSchedule: string;
     preferredShiftType: string;
     workDays: string;
     workHours: string;
@@ -48,7 +70,7 @@ export interface ProfileViewProps {
     // Данные формы при редактировании
     formData: ProfileUser;
     // Структура компании для нормализации названий отделов и позиций
-    companyStructure?: CompanyStructureItem[] | null;
+    companyStructure?: CompanyStructureResponse | null;
     // Это свой профиль или профиль другого пользователя
     isOwnProfile?: boolean;
     // Роль текущего пользователя (для определения прав)
@@ -90,7 +112,7 @@ export const ProfileView = ({
     const getDepartmentName = (code: string): string => {
         if (!code) return '';
         if (!companyStructure) return code;
-        const dept = companyStructure.find(d => d.code === code);
+        const dept = companyStructure.data.find(d => d.code === code);
         return dept?.name || code;
     };
 
@@ -98,7 +120,7 @@ export const ProfileView = ({
         if (!code) return '';
         if (!companyStructure) return code;
         // Ищем позицию во всех отделах
-        for (const dept of companyStructure) {
+        for (const dept of companyStructure.data) {
             const position = dept.positions.find(p => p.code === code);
             if (position) return position.name;
         }
@@ -106,11 +128,18 @@ export const ProfileView = ({
     };
 
     const getGradeLabel = (code: string): string => {
-        return getLabel(code, UserGradeLabels);
+        if (!code) return '';
+        if (!companyStructure) return code;
+        const grade = companyStructure.grades.find(g => g.code === code);
+        return grade?.name || code;
     };
 
     const getShiftTypeLabel = (code: string): string => {
-        return getLabel(code, ShiftPreferenceLabels);
+        return getLabel(code, SHIFT_PREFERENCE_LABELS);
+    };
+
+    const getWorkScheduleLabel = (code: string): string => {
+        return getLabel(code, WORK_SCHEDULE_LABELS);
     };
 
     const handleBlockToggle = () => {
@@ -120,10 +149,13 @@ export const ProfileView = ({
     };
 
     console.log('onAvatarClick=', onAvatarClick);
+
+    console.log('formData=', formData);
+    
     
     // Определяем, нужно ли показывать кнопки редактирования и блокировки
-    // const shouldShowActionButtons = !isOwnProfile || currentUserRole === 'teamlead';
-    const shouldShowActionButtons = currentUserRole === 'teamlead';
+    // const shouldShowActionButtons = !isOwnProfile || currentUserRole === 'TEAMLEAD';
+    const shouldShowActionButtons = currentUserRole === 'TEAMLEAD';
     console.log('currentUserRole=', currentUserRole);
     
 
@@ -170,7 +202,7 @@ export const ProfileView = ({
                     </div> */}
 
                     <div className={styles.card}>
-                        <h3>General information</h3>
+                        <h3>Общая информация</h3>
                         {isEditing ? (
                             <div className={styles.editForm}>
                                 <div className={styles.formGroup}>
@@ -239,14 +271,14 @@ export const ProfileView = ({
 
                 <div className={styles.column}>
                     <div className={styles.card}>
-                        <h3>Work information</h3>
+                        <h3>Рабочая информация</h3>
                         {isEditing ? (
                             <div className={styles.editForm}>
                                 <div className={styles.formGroup}>
                                     <label>Отдел</label>
                                     <select name="department" value={formData.department} onChange={onInputChange}>
                                         <option value="">Выберите отдел</option>
-                                        {companyStructure?.map(dept => (
+                                        {companyStructure?.data.map(dept => (
                                             <option key={dept.code} value={dept.code}>
                                                 {dept.name}
                                             </option>
@@ -257,7 +289,7 @@ export const ProfileView = ({
                                     <label>Позиция</label>
                                     <select name="position" value={formData.position} onChange={onInputChange}>
                                         <option value="">Выберите позицию</option>
-                                        {companyStructure?.flatMap(dept =>
+                                        {companyStructure?.data.flatMap(dept =>
                                             dept.positions.map(pos => (
                                                 <option key={pos.code} value={pos.code}>
                                                     {pos.name}
@@ -270,9 +302,20 @@ export const ProfileView = ({
                                     <label>Grade</label>
                                     <select name="grade" value={formData.grade} onChange={onInputChange}>
                                         <option value="">Выберите грейд</option>
-                                        {Object.entries(UserGradeEnum).map(([_, value]) => (
-                                            <option key={value} value={value}>
-                                                {getLabel(value, UserGradeLabels)}
+                                        {companyStructure?.grades.map(grade => (
+                                            <option key={grade.code} value={grade.code}>
+                                                {grade.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>Тип графика</label>
+                                    <select name="workSchedule" value={formData.workSchedule} onChange={onInputChange}>
+                                        <option value="">Выберите тип графика</option>
+                                        {Object.entries(WORK_SCHEDULE_LABELS).map(([key, label]) => (
+                                            <option key={key} value={key}>
+                                                {label}
                                             </option>
                                         ))}
                                     </select>
@@ -281,9 +324,9 @@ export const ProfileView = ({
                                     <label>Предпочтительный тип смены</label>
                                     <select name="preferredShiftType" value={formData.preferredShiftType} onChange={onInputChange}>
                                         <option value="">Выберите тип смены</option>
-                                        {Object.entries(ShiftPreferenceEnum).map(([_, value]) => (
+                                        {Object.entries(SHIFT_PREFERENCE).map(([_, value]) => (
                                             <option key={value} value={value}>
-                                                {getLabel(value, ShiftPreferenceLabels)}
+                                                {getLabel(value, SHIFT_PREFERENCE_LABELS)}
                                             </option>
                                         ))}
                                     </select>
@@ -310,6 +353,10 @@ export const ProfileView = ({
                                 <div className={styles.infoItem}>
                                     <span className={styles.label}>Grade</span>
                                     <span className={styles.value}>{getGradeLabel(user.grade)}</span>
+                                </div>
+                                <div className={styles.infoItem}>
+                                    <span className={styles.label}>Тип графика</span>
+                                    <span className={styles.value}>{getWorkScheduleLabel(user.workSchedule)}</span>
                                 </div>
                                 <div className={styles.infoItem}>
                                     <span className={styles.label}>Предпочтительный тип смены</span>

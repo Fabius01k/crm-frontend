@@ -200,12 +200,19 @@ const userSlice = createSlice({
             })
             .addCase(userThunks.deleteUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.users = state.users.filter(u => u.id !== action.meta.arg);
-                toast.success('Пользователь удалён');
+                const { id, data } = action.meta.arg;
+                if (data.isDeleted) {
+                    // Удаляем пользователя из списка
+                    state.users = state.users.filter(u => u.id !== id);
+                    toast.success('Пользователь удалён');
+                } else {
+                    // Восстанавливаем пользователя (нужно перезагрузить список)
+                    toast.success('Пользователь восстановлен');
+                }
             })
             .addCase(userThunks.deleteUser.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload ?? 'Ошибка удаления пользователя';
+                state.error = action.payload ?? 'Ошибка удаления/восстановления пользователя';
                 toast.error(state.error);
             });
 
@@ -217,7 +224,7 @@ const userSlice = createSlice({
             })
             .addCase(userThunks.fetchCompanyStructure.fulfilled, (state, action) => {
                 state.loading = false;
-                state.companyStructure = action.payload.data;
+                state.companyStructure = action.payload; // сохраняем весь ответ
             })
             .addCase(userThunks.fetchCompanyStructure.rejected, (state, action) => {
                 state.loading = false;

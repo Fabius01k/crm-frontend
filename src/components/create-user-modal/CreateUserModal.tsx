@@ -2,20 +2,48 @@ import { useState, useEffect } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { userThunks } from '@store/features/user-slice/user-thunks';
-import type { CreateUserDto, CompanyStructureItem } from '@store/features/user-slice/user-types';
-import {
-  UserGradeEnum,
-  UserGradeLabels,
-  WorkScheduleEnum,
-  WorkScheduleLabels,
-  ShiftPreferenceEnum,
-  ShiftPreferenceLabels,
-  UserRoleEnum,
-  UserRoleLabels,
-} from '@/common/enums/enums';
+import type { CreateUserDto } from '@store/features/user-slice/user-types';
 import styles from './CreateUserModal.module.scss';
 
 import createPassImage from '@assets/icons/create-password/create-pass-image.png';
+
+// Константы для статических значений (ранее были в enums.ts)
+const WORK_SCHEDULE = {
+  DEFAULT: 'default',
+  SHIFT_SCHEDULE: 'shift_schedule',
+} as const;
+
+const SHIFT_PREFERENCE = {
+  MORNING: 'morning',
+  DAY: 'day',
+  NIGHT: 'night',
+  MIXED: 'mixed',
+} as const;
+
+const USER_ROLE = {
+  EMPLOYEE: 'EMPLOYEE',
+  TEAMLEAD: 'TEAMLEAD',
+  INTERN: 'INTERN',
+} as const;
+
+// Метки для отображения
+const WORK_SCHEDULE_LABELS: Record<string, string> = {
+  [WORK_SCHEDULE.DEFAULT]: 'Стандартный',
+  [WORK_SCHEDULE.SHIFT_SCHEDULE]: 'Сменный',
+};
+
+const SHIFT_PREFERENCE_LABELS: Record<string, string> = {
+  [SHIFT_PREFERENCE.MORNING]: 'Утренняя',
+  [SHIFT_PREFERENCE.DAY]: 'Дневная',
+  [SHIFT_PREFERENCE.NIGHT]: 'Ночная',
+  [SHIFT_PREFERENCE.MIXED]: 'Любая',
+};
+
+const USER_ROLE_LABELS: Record<string, string> = {
+  [USER_ROLE.EMPLOYEE]: 'Сотрудник',
+  [USER_ROLE.TEAMLEAD]: 'Тимлид',
+  [USER_ROLE.INTERN]: 'Стажёр',
+};
 
 interface CreateUserModalProps {
     isOpen: boolean;
@@ -36,12 +64,12 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
         birthDate: '', // Обязательное поле в API, но может быть пустой строкой
         phoneNumber: '',
         tgLink: '',
-        role: UserRoleEnum.EMPLOYEE,
+        role: 'EMPLOYEE',
         grade: undefined,
-        preferredShiftType: undefined,
+        shiftPreference: undefined,
         workSchedule: undefined,
-        department: '',
-        position: '',
+        // department: '',
+        // position: '',
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -51,12 +79,12 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
     // Фильтруем позиции в зависимости от выбранного отдела
     useEffect(() => {
         if (formData.department && companyStructure) {
-            const selectedDept = companyStructure.find(dept => dept.code === formData.department);
+            const selectedDept = companyStructure.data.find(dept => dept.code === formData.department);
             if (selectedDept) {
                 setAvailablePositions(selectedDept.positions);
                 // Если текущая позиция не входит в доступные, сбрасываем её
                 if (formData.position && !selectedDept.positions.some(pos => pos.code === formData.position)) {
-                    setFormData(prev => ({ ...prev, position: '' }));
+                    // setFormData(prev => ({ ...prev, position: '' }));
                 }
             } else {
                 setAvailablePositions([]);
@@ -64,7 +92,7 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
         } else {
             // Все позиции из всех отделов (уникальные)
             if (companyStructure) {
-                const allPositions = companyStructure.flatMap(dept => dept.positions);
+                const allPositions = companyStructure.data.flatMap(dept => dept.positions);
                 const uniquePositions = allPositions.reduce((acc, pos) => {
                     if (!acc.some(p => p.code === pos.code)) {
                         acc.push(pos);
@@ -80,8 +108,8 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
 
     // Сбрасываем тип смены, если выбран не сменный график
     useEffect(() => {
-        if (formData.workSchedule !== WorkScheduleEnum.SHIFT_SCHEDULE && formData.preferredShiftType) {
-            setFormData(prev => ({ ...prev, preferredShiftType: undefined }));
+        if (formData.workSchedule !== WORK_SCHEDULE.SHIFT_SCHEDULE && formData.shiftPreference) {
+            setFormData(prev => ({ ...prev, shiftPreference: undefined }));
         }
     }, [formData.workSchedule]);
 
@@ -110,8 +138,8 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
         if (!formData.grade) newErrors.grade = 'Грейд обязателен';
         if (!formData.workSchedule) newErrors.workSchedule = 'Тип графика обязателен';
         
-        if (formData.workSchedule === WorkScheduleEnum.SHIFT_SCHEDULE && !formData.preferredShiftType) {
-            newErrors.preferredShiftType = 'Тип смены обязателен для сменного графика';
+        if (formData.workSchedule === WORK_SCHEDULE.SHIFT_SCHEDULE && !formData.shiftPreference) {
+            newErrors.shiftPreference = 'Тип смены обязателен для сменного графика';
         }
 
         setErrors(newErrors);
@@ -170,12 +198,12 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                 birthDate: '',
                 phoneNumber: '',
                 tgLink: '',
-                role: UserRoleEnum.EMPLOYEE,
+                role: 'EMPLOYEE',
                 grade: undefined,
-                preferredShiftType: undefined,
+                shiftPreference: undefined,
                 workSchedule: undefined,
-                department: '',
-                position: '',
+                // department: '',
+                // position: '',
             });
             onSuccess?.();
             onClose();
@@ -197,12 +225,12 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
             birthDate: '',
             phoneNumber: '',
             tgLink: '',
-            role: UserRoleEnum.EMPLOYEE,
+            role: 'EMPLOYEE',
             grade: undefined,
-            preferredShiftType: undefined,
+            shiftPreference: undefined,
             workSchedule: undefined,
-            department: '',
-            position: '',
+            // department: '',
+            // position: '',
         });
         setErrors({});
         onClose();
@@ -210,26 +238,25 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
 
     if (!isOpen) return null;
 
-    // Константы для селектов
-    const gradeOptions = [
-        { value: UserGradeEnum.JUNIOR, label: UserGradeLabels[UserGradeEnum.JUNIOR] },
-        { value: UserGradeEnum.MIDDLE, label: UserGradeLabels[UserGradeEnum.MIDDLE] },
-        { value: UserGradeEnum.SENIOR, label: UserGradeLabels[UserGradeEnum.SENIOR] },
-    ];
+    // Динамические опции из структуры компании
+    const departmentOptions = companyStructure?.data || [];
+    const gradeOptions = companyStructure?.grades.map(g => ({ value: g.code, label: g.name })) || [];
+
+    // Константы для селектов (статические)
     const scheduleTypeOptions = [
-        { value: WorkScheduleEnum.DEFAULT, label: WorkScheduleLabels[WorkScheduleEnum.DEFAULT] },
-        { value: WorkScheduleEnum.SHIFT_SCHEDULE, label: WorkScheduleLabels[WorkScheduleEnum.SHIFT_SCHEDULE] },
+        { value: WORK_SCHEDULE.DEFAULT, label: WORK_SCHEDULE_LABELS[WORK_SCHEDULE.DEFAULT] },
+        { value: WORK_SCHEDULE.SHIFT_SCHEDULE, label: WORK_SCHEDULE_LABELS[WORK_SCHEDULE.SHIFT_SCHEDULE] },
     ];
     const shiftTypeOptions = [
-        { value: ShiftPreferenceEnum.MORNING, label: ShiftPreferenceLabels[ShiftPreferenceEnum.MORNING] },
-        { value: ShiftPreferenceEnum.DAY, label: ShiftPreferenceLabels[ShiftPreferenceEnum.DAY] },
-        { value: ShiftPreferenceEnum.NIGHT, label: ShiftPreferenceLabels[ShiftPreferenceEnum.NIGHT] },
-        { value: ShiftPreferenceEnum.MIXED, label: ShiftPreferenceLabels[ShiftPreferenceEnum.MIXED] },
+        { value: SHIFT_PREFERENCE.MORNING, label: SHIFT_PREFERENCE_LABELS[SHIFT_PREFERENCE.MORNING] },
+        { value: SHIFT_PREFERENCE.DAY, label: SHIFT_PREFERENCE_LABELS[SHIFT_PREFERENCE.DAY] },
+        { value: SHIFT_PREFERENCE.NIGHT, label: SHIFT_PREFERENCE_LABELS[SHIFT_PREFERENCE.NIGHT] },
+        { value: SHIFT_PREFERENCE.MIXED, label: SHIFT_PREFERENCE_LABELS[SHIFT_PREFERENCE.MIXED] },
     ];
     const roleOptions = [
-        { value: UserRoleEnum.EMPLOYEE, label: UserRoleLabels[UserRoleEnum.EMPLOYEE] },
-        { value: UserRoleEnum.TEAMLEAD, label: UserRoleLabels[UserRoleEnum.TEAMLEAD] },
-        { value: UserRoleEnum.INTERN, label: UserRoleLabels[UserRoleEnum.INTERN] },
+        { value: USER_ROLE.EMPLOYEE, label: USER_ROLE_LABELS[USER_ROLE.EMPLOYEE] },
+        { value: USER_ROLE.TEAMLEAD, label: USER_ROLE_LABELS[USER_ROLE.TEAMLEAD] },
+        { value: USER_ROLE.INTERN, label: USER_ROLE_LABELS[USER_ROLE.INTERN] },
     ];
 
     return (
@@ -337,7 +364,7 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                                     className={errors.department ? styles.inputError : ''}
                                 >
                                     <option value="">Выберите отдел</option>
-                                    {companyStructure?.map((dept: CompanyStructureItem) => (
+                                    {departmentOptions.map((dept) => (
                                         <option key={dept.code} value={dept.code}>
                                             {dept.name}
                                         </option>
@@ -406,14 +433,14 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                         </div>
 
                         <div className={styles.formGroup}>
-                            <label htmlFor="preferredShiftType">Тип смены</label>
+                            <label htmlFor="shiftPreference">Тип смены</label>
                             <select
-                                id="preferredShiftType"
-                                name="preferredShiftType"
-                                value={formData.preferredShiftType}
+                                id="shiftPreference"
+                                name="shiftPreference"
+                                value={formData.shiftPreference}
                                 onChange={handleInputChange}
-                                className={errors.preferredShiftType ? styles.inputError : ''}
-                                disabled={formData.workSchedule !== WorkScheduleEnum.SHIFT_SCHEDULE}
+                                className={errors.shiftPreference ? styles.inputError : ''}
+                                disabled={formData.workSchedule !== WORK_SCHEDULE.SHIFT_SCHEDULE}
                             >
                                 <option value="">Выберите тип смены</option>
                                 {shiftTypeOptions.map((option) => (
@@ -422,8 +449,8 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                                     </option>
                                 ))}
                             </select>
-                            {errors.preferredShiftType && <span className={styles.errorText}>{errors.preferredShiftType}</span>}
-                            {formData.workSchedule !== WorkScheduleEnum.SHIFT_SCHEDULE && (
+                            {errors.shiftPreference && <span className={styles.errorText}>{errors.shiftPreference}</span>}
+                            {formData.workSchedule !== WORK_SCHEDULE.SHIFT_SCHEDULE && (
                                 <div className={styles.hint}>Доступно только для сменного графика</div>
                             )}
                         </div>

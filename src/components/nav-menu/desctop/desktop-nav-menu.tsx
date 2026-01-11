@@ -13,7 +13,7 @@ export const DesktopMenu = () => {
   const [isOpen, setIsOpen] = useState(false)
   
   const currentUserRole: UserRoleType = useAppSelector(state => state.auth.user.role)
-  const isAdminMenuAccessible: boolean = currentUserRole === "teamlead"
+  const isAdminMenuAccessible: boolean = currentUserRole === "TEAMLEAD"
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)

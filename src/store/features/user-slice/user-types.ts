@@ -1,18 +1,19 @@
-import type {
-  UserGrade,
-  WorkSchedule,
-  ShiftPreference,
-  UserRole,
-} from '@/common/enums/enums';
+// Заменим типы, основанные на enum, на строки
+export type DepartmentCode = string;
+export type PositionCode = string;
+export type UserGrade = string;
+export type WorkSchedule = string;
+export type ShiftPreference = string;
+export type UserRole = string;
 
 export interface User {
     id: string;
     fullName: string;
-    department: string | null;
-    position: string | null;
+    department: DepartmentCode | null;
+    position: PositionCode | null;
     grade: UserGrade | null;
     workSchedule: WorkSchedule | null;
-    preferredShiftType: ShiftPreference | null;
+    shiftPreference: ShiftPreference | null;
     email?: string;
     firstName?: string;
     lastName?: string;
@@ -40,11 +41,11 @@ export interface UserProfileType {
         tgLink: string | null;
     };
     workInfo: {
-        department: string | null;
-        position: string | null;
+        department: DepartmentCode | null;
+        position: PositionCode | null;
         grade: UserGrade | null;
         workSchedule: WorkSchedule | null;
-        preferredShiftType: ShiftPreference | null;
+        shiftPreference: ShiftPreference | null;
     };
 }
 
@@ -59,10 +60,10 @@ export interface CreateUserDto {
     tgLink?: string;
     role?: UserRole;
     grade?: UserGrade;
-    preferredShiftType?: ShiftPreference;
+    shiftPreference?: ShiftPreference;
     workSchedule?: WorkSchedule;
-    department?: string;
-    position?: string;
+    department?: DepartmentCode;
+    position?: PositionCode;
 }
 
 export interface UpdateUserProfileDto {
@@ -75,10 +76,10 @@ export interface UpdateUserProfileDto {
 }
 
 export interface UpdateUserWorkInfoDto {
-    department?: string;
-    position?: string;
+    department?: DepartmentCode;
+    position?: PositionCode;
     workSchedule?: WorkSchedule;
-    preferredShiftType?: ShiftPreference;
+    shiftPreference?: ShiftPreference;
     grade?: UserGrade;
 }
 
@@ -92,21 +93,26 @@ export interface AdminChangePasswordDto {
 }
 
 export interface FindUsersDto {
-    department?: string;  // Код отдела
-    position?: string;    // Код позиции
-    grade?: string;
-    workSchedule?: string;
-    preferredShiftType?: string;
+    department?: DepartmentCode;  // Код отдела
+    position?: PositionCode;    // Код позиции
+    grade?: UserGrade;
+    workSchedule?: WorkSchedule;
+    shiftPreference?: ShiftPreference;
     page?: number;
 }
 
 // Тип для фильтров в UI (хранит коды, но отображаются названия)
 export interface FilterState {
-    department: string;   // Код отдела
-    position: string;     // Код позиции
-    grade: string;
-    scheduleType: string;
-    shiftType: string;
+    department: DepartmentCode | '';   // Код отдела или пустая строка
+    position: PositionCode | '';       // Код позиции или пустая строка
+    grade: UserGrade | '';
+    scheduleType: WorkSchedule | '';
+    shiftType: ShiftPreference | '';
+}
+
+// Тип для мягкого удаления пользователя
+export interface DeleteUserDto {
+    isDeleted: boolean;
 }
 
 export interface UsersResponse {
@@ -119,26 +125,70 @@ export interface UsersResponse {
     };
 }
 
-export interface Position {
-    code: string;
+export interface WorkScheduleItem {
+    id: string;
+    code: WorkSchedule;
     name: string;
+    isActive: boolean;
 }
 
-export interface CompanyStructureItem {
-    code: string;
+export interface ShiftPreferenceItem {
+    id: string;
+    code: ShiftPreference;
     name: string;
-    positions: Position[];
+    isActive: boolean;
+}
+
+export interface GradeItem {
+    id: string;
+    code: UserGrade;
+    name: string;
+    isActive: boolean;
+}
+
+export interface CompanyStructurePosition {
+    id: string;
+    code: PositionCode;
+    name: string;
+    isActive: boolean;
+    workSchedule: WorkScheduleItem;
+    shiftPreferences: ShiftPreferenceItem[];
+    grades: GradeItem[];
+}
+
+export interface CompanyStructureDepartment {
+    id: string;
+    code: DepartmentCode;
+    name: string;
+    isActive: boolean;
+    positions: CompanyStructurePosition[];
+    grades: GradeItem[]; // грейды, относящиеся к отделу
 }
 
 export interface CompanyStructureResponse {
-    data: CompanyStructureItem[];
+    data: CompanyStructureDepartment[];
+    positions: Array<{ code: string; name: string }>; // плоский список всех позиций
+    grades: Array<{ code: string; name: string }>;    // плоский список всех грейдов
 }
+
+// Старые типы для обратной совместимости (можно будет удалить после обновления всех компонентов)
+// Удаляем, так как больше не используются
+// export interface Position {
+//     code: string;
+//     name: string;
+// }
+//
+// export interface CompanyStructureItem {
+//     code: string;
+//     name: string;
+//     positions: Position[];
+// }
 
 export interface UserSliceType {
     users: User[];
     currentUser: UserPageDto | null;
     currentUserProfile: UserProfileType | null;
-    companyStructure: CompanyStructureItem[] | null;
+    companyStructure: CompanyStructureResponse | null; // теперь храним весь ответ
     loading: boolean;
     error: string | null;
     pagination: {

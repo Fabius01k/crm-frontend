@@ -7,16 +7,53 @@ import styles from './users-page.module.scss';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { userThunks } from '@store/features/user-slice/user-thunks';
 import { userSliceActions } from '@store/features/user-slice/user-slice';
-import type { FilterState } from '@store/features/user-slice/user-types';
-import {
-  UserGradeLabels,
-  WorkScheduleLabels,
-  ShiftPreferenceLabels,
-  getLabel,
-} from '@/common/enums/enums';
+import type { FilterState, FindUsersDto } from '@store/features/user-slice/user-types';
+import { useNavigate } from 'react-router';
+
+// Локальные константы для графиков и смен (статические, не из API)
+const WORK_SCHEDULE = {
+  DEFAULT: 'default',
+  SHIFT_SCHEDULE: 'shift_schedule',
+} as const;
+
+const SHIFT_PREFERENCE = {
+  MORNING: 'morning',
+  DAY: 'day',
+  NIGHT: 'night',
+  MIXED: 'mixed',
+} as const;
+
+const WORK_SCHEDULE_LABELS: Record<string, string> = {
+  [WORK_SCHEDULE.DEFAULT]: 'Стандартный',
+  [WORK_SCHEDULE.SHIFT_SCHEDULE]: 'Сменный',
+};
+
+const SHIFT_PREFERENCE_LABELS: Record<string, string> = {
+  [SHIFT_PREFERENCE.MORNING]: 'Утренняя',
+  [SHIFT_PREFERENCE.DAY]: 'Дневная',
+  [SHIFT_PREFERENCE.NIGHT]: 'Ночная',
+  [SHIFT_PREFERENCE.MIXED]: 'Любая',
+};
+
+// Вспомогательная функция для получения русскоязычного названия
+function getLabel(value: string, labels: Record<string, string>): string {
+  return labels[value] || value;
+}
+
+// Вспомогательная функция для преобразования FilterState в FindUsersDto
+const convertFiltersToFindUsersDto = (filters: FilterState): FindUsersDto => {
+    return {
+        department: filters.department || undefined,
+        position: filters.position || undefined,
+        grade: filters.grade || undefined,
+        workSchedule: filters.scheduleType || undefined,
+        shiftPreference: filters.shiftType || undefined,
+    };
+};
 
 export const UsersPage = () => {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const { users, loading, error, pagination, searchQuery, companyStructure } = useAppSelector((state) => state.user);
 
     const [filters, setFilters] = useState<FilterState>({
@@ -55,12 +92,8 @@ export const UsersPage = () => {
         // Если это первый рендер, просто загружаем данные
         if (isInitialMount.current) {
             isInitialMount.current = false;
-            const params = {
-                department: filters.department || undefined,
-                position: filters.position || undefined,
-                grade: filters.grade || undefined,
-                workSchedule: filters.scheduleType || undefined,
-                preferredShiftType: filters.shiftType || undefined,
+            const params: FindUsersDto = {
+                ...convertFiltersToFindUsersDto(filters),
                 page: currentPage,
             };
             dispatch(userThunks.fetchUsers(params));
@@ -76,12 +109,8 @@ export const UsersPage = () => {
             dispatch(userThunks.searchUsers(searchQuery.trim()));
         } else {
             const pageToLoad = (filtersChanged || searchChanged) ? 1 : currentPage;
-            const params = {
-                department: filters.department || undefined,
-                position: filters.position || undefined,
-                grade: filters.grade || undefined,
-                workSchedule: filters.scheduleType || undefined,
-                preferredShiftType: filters.shiftType || undefined,
+            const params: FindUsersDto = {
+                ...convertFiltersToFindUsersDto(filters),
                 page: pageToLoad,
             };
             dispatch(userThunks.fetchUsers(params));
@@ -98,18 +127,31 @@ export const UsersPage = () => {
         // Создаем карту отделов: код -> название
         const departmentMap = new Map<string, string>();
         const positionMap = new Map<string, string>(); // код позиции -> название
+        const gradeMap = new Map<string, string>(); // код грейда -> название
         if (companyStructure) {
-            companyStructure.forEach(dept => {
+            // Отделы
+            companyStructure.data.forEach(dept => {
                 departmentMap.set(dept.code, dept.name);
+                // Позиции внутри отдела
                 dept.positions.forEach(pos => {
                     positionMap.set(pos.code, pos.name);
                 });
+            });
+            // Грейды из плоского списка
+            companyStructure.grades.forEach(grade => {
+                gradeMap.set(grade.code, grade.name);
             });
         }
 
         return users.map((user) => {
             const departmentName = user.department ? departmentMap.get(user.department) || user.department : '';
             const positionName = user.position ? positionMap.get(user.position) || user.position : '';
+            const gradeName = user.grade ? gradeMap.get(user.grade) || user.grade : '';
+            const shiftTypeLabel = user.shiftPreference ? getLabel(user.shiftPreference, SHIFT_PREFERENCE_LABELS) : '';
+            // Отладочный вывод
+            if (user.shiftPreference && !shiftTypeLabel) {
+                console.warn('Не найден label для shiftPreference:', user.shiftPreference, SHIFT_PREFERENCE_LABELS);
+            }
             return {
                 id: user.id,
                 fullName: user.fullName,
@@ -120,11 +162,11 @@ export const UsersPage = () => {
                 // Исходные значения для фильтрации
                 grade: user.grade || '',
                 scheduleType: user.workSchedule || '',
-                shiftType: user.preferredShiftType || '',
+                shiftType: user.shiftPreference || '',
                 // Метки для отображения
-                gradeLabel: user.grade ? getLabel(user.grade, UserGradeLabels) : '',
-                scheduleTypeLabel: user.workSchedule ? getLabel(user.workSchedule, WorkScheduleLabels) : '',
-                shiftTypeLabel: user.preferredShiftType ? getLabel(user.preferredShiftType, ShiftPreferenceLabels) : '',
+                gradeLabel: gradeName,
+                scheduleTypeLabel: user.workSchedule ? getLabel(user.workSchedule, WORK_SCHEDULE_LABELS) : '',
+                shiftTypeLabel,
             };
         });
     }, [users, companyStructure]);
@@ -135,8 +177,8 @@ export const UsersPage = () => {
 
         // Отделы: из структуры компании, если она загружена, иначе из пользователей
         let departments: Array<{ code: string; name: string }> = [];
-        if (companyStructure && companyStructure.length > 0) {
-            departments = companyStructure.map(dept => ({ code: dept.code, name: dept.name }));
+        if (companyStructure && companyStructure.data.length > 0) {
+            departments = companyStructure.data.map(dept => ({ code: dept.code, name: dept.name }));
         } else {
             departments = Array.from(new Set(filtered.map(user => user.department)))
                 .filter(dept => dept)
@@ -145,10 +187,10 @@ export const UsersPage = () => {
 
         // Позиции: если выбран отдел, берем позиции из этого отдела, иначе все уникальные позиции из всех отделов
         let positions: Array<{ code: string; name: string }> = [];
-        if (companyStructure && companyStructure.length > 0) {
+        if (companyStructure && companyStructure.data.length > 0) {
             if (filters.department) {
                 // Найти отдел по коду
-                const selectedDept = companyStructure.find(dept => dept.code === filters.department);
+                const selectedDept = companyStructure.data.find(dept => dept.code === filters.department);
                 if (selectedDept) {
                     positions = selectedDept.positions.map(pos => ({ code: pos.code, name: pos.name }));
                 } else {
@@ -163,7 +205,7 @@ export const UsersPage = () => {
                 }
             } else {
                 // Все уникальные позиции из всех отделов без повторений
-                const allPositions = companyStructure.flatMap(dept =>
+                const allPositions = companyStructure.data.flatMap(dept =>
                     dept.positions.map(pos => ({ code: pos.code, name: pos.name }))
                 );
                 // Убираем дубликаты по коду
@@ -189,38 +231,53 @@ export const UsersPage = () => {
                 .map(pos => ({ code: pos, name: pos }));
         }
 
-        // Грейды: оставляем старую логику (из пользователей)
-        let gradesFiltered = filtered;
-        if (filters.department) {
-            gradesFiltered = gradesFiltered.filter(user => user.department === filters.department);
+        // Грейды: используем плоский список из companyStructure.grades, фильтруем по отделу и позиции
+        let grades: string[] = [];
+        if (companyStructure && companyStructure.grades.length > 0) {
+            // Если выбран отдел, берем грейды из этого отдела (если они есть в данных отдела)
+            // В новом формате грейды не привязаны к отделам, поэтому показываем все грейды
+            grades = companyStructure.grades.map(g => g.code);
+        } else {
+            // Fallback к старой логике (из пользователей)
+            let gradesFiltered = filtered;
+            if (filters.department) {
+                gradesFiltered = gradesFiltered.filter(user => user.department === filters.department);
+            }
+            if (filters.position) {
+                gradesFiltered = gradesFiltered.filter(user => user.position === filters.position);
+            }
+            grades = Array.from(new Set(gradesFiltered.map(user => user.grade).filter(Boolean)));
         }
-        if (filters.position) {
-            gradesFiltered = gradesFiltered.filter(user => user.position === filters.position);
-        }
-        const grades = Array.from(new Set(gradesFiltered.map(user => user.grade)));
 
-        const scheduleTypes = Array.from(new Set(filtered.map(user => user.scheduleType)));
-        const shiftTypes = Array.from(new Set(filtered.map(user => user.shiftType)));
+        const scheduleTypes = Array.from(new Set(filtered.map(user => user.scheduleType).filter(Boolean)));
+        const shiftTypes = Array.from(new Set(filtered.map(user => user.shiftType).filter(Boolean)));
 
         // Преобразуем значения в объекты с русскими названиями
-        const gradeValues = ['', ...grades];
-        const scheduleTypeValues = ['', ...scheduleTypes];
-        const shiftTypeValues = ['', ...shiftTypes];
+        // Добавляем пустое значение для опции "Все", только если его ещё нет
+        const gradeValues = grades.includes('') ? grades : ['', ...grades];
+        const scheduleTypeValues = scheduleTypes.includes('') ? scheduleTypes : ['', ...scheduleTypes];
+        const shiftTypeValues = shiftTypes.includes('') ? shiftTypes : ['', ...shiftTypes];
+
+        // Создаем карту названий грейдов
+        const gradeNameMap = new Map<string, string>();
+        if (companyStructure) {
+            companyStructure.grades.forEach(g => gradeNameMap.set(g.code, g.name));
+        }
 
         return {
             departments,
             positions,
             grades: gradeValues.map(value => ({
                 value,
-                label: value ? getLabel(value, UserGradeLabels) : 'Все',
+                label: value ? (gradeNameMap.get(value) || value) : 'Все',
             })),
             scheduleTypes: scheduleTypeValues.map(value => ({
                 value,
-                label: value ? getLabel(value, WorkScheduleLabels) : 'Все',
+                label: value ? getLabel(value, WORK_SCHEDULE_LABELS) : 'Все',
             })),
             shiftTypes: shiftTypeValues.map(value => ({
                 value,
-                label: value ? getLabel(value, ShiftPreferenceLabels) : 'Все',
+                label: value ? getLabel(value, SHIFT_PREFERENCE_LABELS) : 'Все',
             })),
         };
     }, [filters, transformedUsers, companyStructure]);
@@ -281,12 +338,8 @@ export const UsersPage = () => {
 
     const handleUserCreated = () => {
         // Перезагружаем пользователей после создания
-        const params = {
-            department: filters.department || undefined,
-            position: filters.position || undefined,
-            grade: filters.grade || undefined,
-            workSchedule: filters.scheduleType || undefined,
-            preferredShiftType: filters.shiftType || undefined,
+        const params: FindUsersDto = {
+            ...convertFiltersToFindUsersDto(filters),
             page: currentPage,
         };
         dispatch(userThunks.fetchUsers(params));
@@ -295,7 +348,8 @@ export const UsersPage = () => {
     // Обработчик клика на строку таблицы
     const handleRowClick = (userId: string) => {
         // Открываем профиль пользователя в новой вкладке
-        window.open(`/users/${userId}`, '_blank');
+        // window.open(`/users/${userId}`, '_blank');
+        navigate(`/users/${userId}`);
     };
 
     if (loading) {

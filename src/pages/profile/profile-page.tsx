@@ -22,6 +22,7 @@ const mapProfileToLocalUser = (profile: any): ProfileUser => {
             department: '',
             position: '',
             grade: '',
+            workSchedule: '',
             preferredShiftType: '',
             workDays: '15',
             workHours: '120',
@@ -42,7 +43,8 @@ const mapProfileToLocalUser = (profile: any): ProfileUser => {
         department: profile.workInfo?.department || '',
         position: profile.workInfo?.position || '',
         grade: profile.workInfo?.grade || '',
-        preferredShiftType: profile.workInfo?.preferredShiftType || '',
+        workSchedule: profile.workInfo?.workSchedule || '',
+        preferredShiftType: profile.workInfo?.shiftPreference || '',
         workDays: '15', // Пока оставляем хардкод
         workHours: '120', // Пока оставляем хардкод
         avatar: ava1

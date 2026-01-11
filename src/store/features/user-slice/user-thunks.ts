@@ -13,6 +13,7 @@ import type {
     UserPageDto,
     UserProfileType,
     CompanyStructureResponse,
+    DeleteUserDto,
 } from "./user-types";
 import type { UserRoleType } from '../auth-slice/auth-types';
 // import { userActs } from './user-actions';
@@ -190,12 +191,12 @@ export const userThunks = {
         }
     ),
 
-    // Удалить пользователя
-    deleteUser: createAsyncThunk<{ message: string }, string, { rejectValue: string }>(
+    // Удалить/восстановить пользователя (мягкое удаление)
+    deleteUser: createAsyncThunk<{ message: string }, { id: string; data: DeleteUserDto }, { rejectValue: string }>(
         'users/deleteUser',
-        async (id, thunkAPI) => {
+        async ({ id, data }, thunkAPI) => {
             try {
-                const response = await userAPI.deleteUser(id);
+                const response = await userAPI.deleteUser(id, data);
                 return response;
             } catch (error) {
                 const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;

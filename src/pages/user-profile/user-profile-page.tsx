@@ -23,6 +23,7 @@ const mapProfileToLocalUser = (profile: any): ProfileUser => {
             department: '',
             position: '',
             grade: '',
+            workSchedule: '',
             preferredShiftType: '',
             workDays: '15',
             workHours: '120',
@@ -43,7 +44,8 @@ const mapProfileToLocalUser = (profile: any): ProfileUser => {
         department: profile.workInfo?.department || '',
         position: profile.workInfo?.position || '',
         grade: profile.workInfo?.grade || '',
-        preferredShiftType: profile.workInfo?.preferredShiftType || '',
+        workSchedule: profile.workInfo?.workSchedule || '',
+        preferredShiftType: profile.workInfo?.shiftPreference || '',
         workDays: '15', // Пока оставляем хардкод
         workHours: '120', // Пока оставляем хардкод
         avatar: ava1
@@ -53,11 +55,16 @@ const mapProfileToLocalUser = (profile: any): ProfileUser => {
 export const UserProfilePage = () => {
     const { id } = useParams<{ id: string }>();
     const dispatch = useDispatch<AppDispatch>();
-    const { users, loading, error, companyStructure } = useSelector((state: RootState) => state.user);
+    const { users, currentUser, loading, error, companyStructure } = useSelector((state: RootState) => state.user);
     const { user: authUser } = useSelector((state: RootState) => state.auth);
 
-    // Найти пользователя в списке users или загрузить по ID
-    const userFromStore = users.find(u => u.id === id);
+    console.log('store users:', users);
+    console.log('store currentUser:', currentUser);
+    console.log('id:', id);
+
+    // Используем currentUser (загруженный через fetchUserPage) или ищем в users
+    const userFromStore = currentUser && currentUser.id === id ? currentUser : users.find(u => u.id === id);
+    console.log('userFromStore:', userFromStore);
     
     const [user, setUser] = useState<ProfileUser>(() => mapProfileToLocalUser(userFromStore));
     const [isEditing, setIsEditing] = useState(false);
@@ -81,7 +88,9 @@ export const UserProfilePage = () => {
     // Синхронизация локального состояния с данными из store
     useEffect(() => {
         if (userFromStore) {
+            console.log('userFromStore:', userFromStore);
             const mappedUser = mapProfileToLocalUser(userFromStore);
+            console.log('mappedUser:', mappedUser);
             setUser(mappedUser);
             // Если не в режиме редактирования, обновляем formData
             if (!isEditing) {
@@ -128,11 +137,10 @@ export const UserProfilePage = () => {
     };
 
     // Отображение состояния загрузки
-    if (loading && !userFromStore) {
+    if (loading) {
         return (
             <div className={styles.container}>
-                <h2>Профиль пользователя</h2>
-                <Preloader variant="inline" size="large" text="Загрузка профиля..." />
+                <Preloader variant="fullscreen" text="Загрузка профиля..." />
             </div>
         );
     }

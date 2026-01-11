@@ -1,4 +1,6 @@
 // Используем объекты с as const вместо enum для совместимости с erasableSyntaxOnly
+
+// WorkScheduleCode из документации
 export const WorkScheduleEnum = {
   DEFAULT: 'default',
   SHIFT_SCHEDULE: 'shift_schedule',
@@ -6,6 +8,7 @@ export const WorkScheduleEnum = {
 
 export type WorkSchedule = (typeof WorkScheduleEnum)[keyof typeof WorkScheduleEnum];
 
+// ShiftPreferenceCode из документации
 export const ShiftPreferenceEnum = {
   MORNING: 'morning',
   DAY: 'day',
@@ -15,18 +18,11 @@ export const ShiftPreferenceEnum = {
 
 export type ShiftPreference = (typeof ShiftPreferenceEnum)[keyof typeof ShiftPreferenceEnum];
 
-export const UserGradeEnum = {
-  JUNIOR: 'junior',
-  MIDDLE: 'middle',
-  SENIOR: 'senior',
-} as const;
-
-export type UserGrade = (typeof UserGradeEnum)[keyof typeof UserGradeEnum];
-
+// UserRole из документации (верхний регистр)
 export const UserRoleEnum = {
-  EMPLOYEE: 'employee',
-  TEAMLEAD: 'teamlead',
-  INTERN: 'intern',
+  EMPLOYEE: 'EMPLOYEE',
+  TEAMLEAD: 'TEAMLEAD',
+  INTERN: 'INTERN',
 } as const;
 
 export type UserRole = (typeof UserRoleEnum)[keyof typeof UserRoleEnum];
@@ -42,12 +38,6 @@ export const ShiftPreferenceLabels: Record<ShiftPreference, string> = {
   [ShiftPreferenceEnum.DAY]: 'Дневная',
   [ShiftPreferenceEnum.NIGHT]: 'Ночная',
   [ShiftPreferenceEnum.MIXED]: 'Любая',
-} as const;
-
-export const UserGradeLabels: Record<UserGrade, string> = {
-  [UserGradeEnum.JUNIOR]: 'Junior',
-  [UserGradeEnum.MIDDLE]: 'Middle',
-  [UserGradeEnum.SENIOR]: 'Senior',
 } as const;
 
 export const UserRoleLabels: Record<UserRole, string> = {

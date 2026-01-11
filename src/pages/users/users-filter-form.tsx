@@ -1,8 +1,7 @@
 import { type ChangeEvent, useState, useEffect, useMemo } from 'react';
 import arrowIcon from '@assets/icons/arrow.svg';
 import styles from './users-page.module.scss';
-import type { FilterState, CompanyStructureItem } from '@store/features/user-slice/user-types';
-import { WorkScheduleEnum } from '@/common/enums/enums';
+import type { FilterState, CompanyStructureResponse } from '@store/features/user-slice/user-types';
 
 interface UsersFilterFormProps {
     onApplyFilters: (filters: FilterState) => void;
@@ -15,7 +14,7 @@ interface UsersFilterFormProps {
         scheduleTypes: Array<{ value: string; label: string }>;
         shiftTypes: Array<{ value: string; label: string }>;
     };
-    companyStructure?: CompanyStructureItem[];
+    companyStructure?: CompanyStructureResponse;
 }
 
 export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters, availableOptions, companyStructure }: UsersFilterFormProps) => {
@@ -45,18 +44,24 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
         shiftTypes = [{ value: '', label: 'Все' }]
     } = availableOptions || {};
 
+    // Локальная константа для типа графика (можно вынести в общий файл, но пока здесь)
+    const WORK_SCHEDULE = {
+        DEFAULT: 'default',
+        SHIFT_SCHEDULE: 'shift_schedule',
+    } as const;
+
     // Вычисляем позиции на основе структуры компании и выбранного отдела
     const computedPositions = useMemo(() => {
-        if (companyStructure && companyStructure.length > 0) {
+        if (companyStructure && companyStructure.data.length > 0) {
             if (filters.department) {
                 // Ищем отдел по коду
-                const selectedDept = companyStructure.find(dept => dept.code === filters.department);
+                const selectedDept = companyStructure.data.find(dept => dept.code === filters.department);
                 if (selectedDept) {
                     return selectedDept.positions;
                 }
             } else {
                 // Все уникальные позиции из всех отделов без повторений
-                const allPositions = companyStructure.flatMap(dept => dept.positions);
+                const allPositions = companyStructure.data.flatMap(dept => dept.positions);
                 // Убираем дубликаты по коду
                 const uniquePositions = allPositions.reduce((acc, pos) => {
                     if (!acc.some(p => p.code === pos.code)) {
@@ -71,7 +76,7 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
         return positions;
     }, [companyStructure, filters.department, positions]);
 
-    const showShiftType = filters.scheduleType === WorkScheduleEnum.SHIFT_SCHEDULE;
+    const showShiftType = filters.scheduleType === WORK_SCHEDULE.SHIFT_SCHEDULE;
 
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -94,7 +99,7 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
                 newFilters.grade = '';
             }
             // Если изменился тип графика и выбран не сменный график, сбрасываем тип смены
-            if (name === 'scheduleType' && value !== WorkScheduleEnum.SHIFT_SCHEDULE) {
+            if (name === 'scheduleType' && value !== WORK_SCHEDULE.SHIFT_SCHEDULE) {
                 newFilters.shiftType = '';
             }
 

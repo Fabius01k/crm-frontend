@@ -10,6 +10,7 @@ import type {
     UserPageDto,
     UserProfileType,
     CompanyStructureResponse,
+    DeleteUserDto,
 } from "./user-types";
 
 const userApiBaseURI = "users";
@@ -89,9 +90,11 @@ export const userAPI = {
         return response.data;
     },
 
-    // DELETE /users/:id
-    deleteUser: async (id: string): Promise<{ message: string }> => {
-        const response = await instance.delete<{ message: string }>(`${userApiBaseURI}/${id}`);
+    // DELETE /users/:id (мягкое удаление/восстановление)
+    deleteUser: async (id: string, data: DeleteUserDto): Promise<{ message: string }> => {
+        const response = await instance.delete<{ message: string }>(`${userApiBaseURI}/${id}`, {
+            data,
+        });
         return response.data;
     },
 
