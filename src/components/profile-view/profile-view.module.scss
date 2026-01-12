@@ -191,6 +191,7 @@
 
 .editButton, .saveButton, .cancelButton, .blockButton {
     min-height: 40px;
+    height: fit-content;
     // padding: 10px 24px;
     border-radius: 6px;
     font-size: 14px;

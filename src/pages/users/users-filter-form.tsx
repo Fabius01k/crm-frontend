@@ -3,7 +3,6 @@ import arrowIcon from '@assets/icons/arrow.svg';
 import styles from './users-page.module.scss';
 import type { FilterState, CompanyStructureResponse } from '@store/features/user-slice/user-types';
 import { getFilteredPositions, getFilteredGrades } from '../../common/utils/company-structure-filters';
-import { WorkScheduleEnum } from '../../common/enums/enums';
 
 interface UsersFilterFormProps {
     onApplyFilters: (filters: FilterState) => void;
@@ -13,8 +12,6 @@ interface UsersFilterFormProps {
         departments: Array<{ code: string; name: string }>;
         positions: Array<{ code: string; name: string }>;
         grades: Array<{ value: string; label: string }>;
-        scheduleTypes: Array<{ value: string; label: string }>;
-        shiftTypes: Array<{ value: string; label: string }>;
     };
     companyStructure?: CompanyStructureResponse;
 }
@@ -44,8 +41,6 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
         departments = [{ code: '', name: '' }],
         positions = [{ code: '', name: '' }],
         grades = [{ value: '', label: 'Все' }],
-        scheduleTypes = [{ value: '', label: 'Все' }],
-        shiftTypes = [{ value: '', label: 'Все' }]
     } = availableOptions || {};
 
     // Вычисляем позиции на основе структуры компании и выбранного отдела
@@ -57,8 +52,6 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
     const computedGrades = useMemo(() => {
         return getFilteredGrades(companyStructure, filters.department, filters.position, grades);
     }, [companyStructure, filters.department, filters.position, grades]);
-
-    const showShiftType = filters.scheduleType === WorkScheduleEnum.SHIFT_SCHEDULE;
 
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -79,10 +72,6 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
             // Если изменилась позиция, сбрасываем грейд, если он не доступен для новой позиции
             if (name === 'position') {
                 newFilters.grade = '';
-            }
-            // Если изменился тип графика и выбран не сменный график, сбрасываем тип смены
-            if (name === 'scheduleType' && value !== WorkScheduleEnum.SHIFT_SCHEDULE) {
-                newFilters.shiftType = '';
             }
 
             return newFilters;
@@ -189,57 +178,6 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
                             src={arrowIcon}
                             alt=""
                             className={`${styles.selectIcon} ${isFocused('grade') ? styles.selectIconRotated : ''}`}
-                        />
-                    </div>
-                </div>
-                <div className={styles.filterGroup}>
-                    <label htmlFor="scheduleType">Тип графика</label>
-                    <div className={styles.selectWrapper}>
-                        <select
-                            id="scheduleType"
-                            name="scheduleType"
-                            value={filters.scheduleType}
-                            onChange={handleChange}
-                            onFocus={() => handleFocus('scheduleType')}
-                            onBlur={handleBlur}
-                            className={styles.filterSelect}
-                        >
-                            {scheduleTypes.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                        <img
-                            src={arrowIcon}
-                            alt=""
-                            className={`${styles.selectIcon} ${isFocused('scheduleType') ? styles.selectIconRotated : ''}`}
-                        />
-                    </div>
-                </div>
-                <div className={styles.filterGroup}>
-                    <label htmlFor="shiftType">Тип смены</label>
-                    <div className={styles.selectWrapper}>
-                        <select
-                            id="shiftType"
-                            name="shiftType"
-                            value={filters.shiftType}
-                            onChange={handleChange}
-                            onFocus={() => handleFocus('shiftType')}
-                            onBlur={handleBlur}
-                            className={styles.filterSelect}
-                            disabled={!showShiftType}
-                        >
-                            {shiftTypes.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                        <img
-                            src={arrowIcon}
-                            alt=""
-                            className={`${styles.selectIcon} ${isFocused('shiftType') ? styles.selectIconRotated : ''}`}
                         />
                     </div>
                 </div>

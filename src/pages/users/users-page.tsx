@@ -122,14 +122,27 @@ export const UsersPage = () => {
         }
 
         return users.map((user) => {
-            const departmentName = user.department ? departmentMap.get(user.department) || user.department : '';
-            const positionName = user.position ? positionMap.get(user.position) || user.position : '';
-            const gradeName = user.grade ? gradeMap.get(user.grade) || user.grade : '';
-            const shiftTypeLabel = user.shiftPreference ? getLabel(user.shiftPreference, ShiftPreferenceLabels) : '';
-            // Отладочный вывод
-            if (user.shiftPreference && !shiftTypeLabel) {
-                console.warn('Не найден label для shiftPreference:', user.shiftPreference, ShiftPreferenceLabels);
+            const departmentName = user.department ? departmentMap.get(user.department) || user.department : '—';
+            const positionName = user.position ? positionMap.get(user.position) || user.position : '—';
+            const gradeName = user.grade ? gradeMap.get(user.grade) || user.grade : '—';
+            
+            // Вычисляем label для типа смены
+            let shiftTypeLabel = '—';
+            if (user.shiftPreference) {
+                const label = getLabel(user.shiftPreference, ShiftPreferenceLabels);
+                shiftTypeLabel = label || '—';
+                if (!label) {
+                    console.warn('Не найден label для shiftPreference:', user.shiftPreference, ShiftPreferenceLabels);
+                }
             }
+            
+            // Вычисляем label для типа графика
+            let scheduleTypeLabel = '—';
+            if (user.workSchedule) {
+                const label = getLabel(user.workSchedule, WorkScheduleLabels);
+                scheduleTypeLabel = label || '—';
+            }
+            
             return {
                 id: user.id,
                 fullName: user.fullName,
@@ -143,7 +156,7 @@ export const UsersPage = () => {
                 shiftType: user.shiftPreference || '',
                 // Метки для отображения
                 gradeLabel: gradeName,
-                scheduleTypeLabel: user.workSchedule ? getLabel(user.workSchedule, WorkScheduleLabels) : '',
+                scheduleTypeLabel,
                 shiftTypeLabel,
             };
         });
