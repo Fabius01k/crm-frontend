@@ -1,7 +1,8 @@
-import { type ChangeEvent, useState, useEffect, useMemo } from 'react';
+import { type ChangeEvent, useState, useEffect, useMemo, useRef } from 'react';
 import arrowIcon from '@assets/icons/arrow.svg';
 import styles from './users-page.module.scss';
 import type { FilterState, CompanyStructureResponse } from '@store/features/user-slice/user-types';
+import { getFilteredPositions, getFilteredGrades } from '../../common/utils/company-structure-filters';
 
 interface UsersFilterFormProps {
     onApplyFilters: (filters: FilterState) => void;
@@ -29,9 +30,11 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
     const [focusedSelectId, setFocusedSelectId] = useState<string | null>(null);
 
     // Синхронизация локального состояния с переданными фильтрами из родителя
+    const prevFiltersRef = useRef<FilterState | undefined>(currentFilters);
     useEffect(() => {
-        if (currentFilters) {
+        if (currentFilters && currentFilters !== prevFiltersRef.current) {
             setFilters(currentFilters);
+            prevFiltersRef.current = currentFilters;
         }
     }, [currentFilters]);
 
@@ -52,29 +55,13 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
 
     // Вычисляем позиции на основе структуры компании и выбранного отдела
     const computedPositions = useMemo(() => {
-        if (companyStructure && companyStructure.data.length > 0) {
-            if (filters.department) {
-                // Ищем отдел по коду
-                const selectedDept = companyStructure.data.find(dept => dept.code === filters.department);
-                if (selectedDept) {
-                    return selectedDept.positions;
-                }
-            } else {
-                // Все уникальные позиции из всех отделов без повторений
-                const allPositions = companyStructure.data.flatMap(dept => dept.positions);
-                // Убираем дубликаты по коду
-                const uniquePositions = allPositions.reduce((acc, pos) => {
-                    if (!acc.some(p => p.code === pos.code)) {
-                        acc.push(pos);
-                    }
-                    return acc;
-                }, [] as Array<{ code: string; name: string }>);
-                return uniquePositions;
-            }
-        }
-        // Fallback к переданным позициям
-        return positions;
+        return getFilteredPositions(companyStructure, filters.department, positions);
     }, [companyStructure, filters.department, positions]);
+
+    // Вычисляем грейды на основе структуры компании, выбранного отдела и позиции
+    const computedGrades = useMemo(() => {
+        return getFilteredGrades(companyStructure, filters.department, filters.position, grades);
+    }, [companyStructure, filters.department, filters.position, grades]);
 
     const showShiftType = filters.scheduleType === WORK_SCHEDULE.SHIFT_SCHEDULE;
 
@@ -197,9 +184,9 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
                             onBlur={handleBlur}
                             className={styles.filterSelect}
                         >
-                            {grades.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
+                            {[{ code: '', name: 'Все' }, ...computedGrades].map(grade => (
+                                <option key={grade.code} value={grade.code}>
+                                    {grade.name}
                                 </option>
                             ))}
                         </select>

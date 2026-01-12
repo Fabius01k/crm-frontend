@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '@store/store';
 import { userThunks } from '@store/features/user-slice/user-thunks';
 import type { CreateUserDto } from '@store/features/user-slice/user-types';
 import styles from './CreateUserModal.module.scss';
+import { getFilteredPositions, getFilteredGrades, getDepartments, getAllGrades, findPositionByCode } from '../../common/utils/company-structure-filters';
 
 import createPassImage from '@assets/icons/create-password/create-pass-image.png';
 
@@ -75,36 +76,67 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [availablePositions, setAvailablePositions] = useState<Array<{ code: string; name: string }>>([]);
+    const [availableGrades, setAvailableGrades] = useState<Array<{ value: string; label: string }>>([]);
 
-    // Фильтруем позиции в зависимости от выбранного отдела
+    // Фильтруем позиции в зависимости от выбранного отдела и грейда
     useEffect(() => {
-        if (formData.department && companyStructure) {
-            const selectedDept = companyStructure.data.find(dept => dept.code === formData.department);
-            if (selectedDept) {
-                setAvailablePositions(selectedDept.positions);
-                // Если текущая позиция не входит в доступные, сбрасываем её
-                if (formData.position && !selectedDept.positions.some(pos => pos.code === formData.position)) {
-                    // setFormData(prev => ({ ...prev, position: '' }));
-                }
-            } else {
-                setAvailablePositions([]);
-            }
-        } else {
-            // Все позиции из всех отделов (уникальные)
-            if (companyStructure) {
-                const allPositions = companyStructure.data.flatMap(dept => dept.positions);
-                const uniquePositions = allPositions.reduce((acc, pos) => {
-                    if (!acc.some(p => p.code === pos.code)) {
-                        acc.push(pos);
-                    }
-                    return acc;
-                }, [] as Array<{ code: string; name: string }>);
-                setAvailablePositions(uniquePositions);
-            } else {
-                setAvailablePositions([]);
-            }
+        if (!companyStructure) {
+            setAvailablePositions([]);
+            return;
         }
-    }, [formData.department, companyStructure]);
+
+        // Используем утилиту для получения отфильтрованных позиций
+        const filteredPositions = getFilteredPositions(companyStructure, formData.department || '', []);
+
+        // Дополнительная фильтрация по грейду, если выбран
+        let finalPositions = filteredPositions;
+        if (formData.grade && filteredPositions.length > 0) {
+            // Находим полные объекты позиций для фильтрации по грейду
+            const allPositions = companyStructure.data.flatMap(dept => dept.positions);
+            const positionObjects = allPositions.filter(pos =>
+                filteredPositions.some(fp => fp.code === pos.code)
+            );
+            
+            finalPositions = positionObjects
+                .filter(pos =>
+                    pos.grades && pos.grades.some(grade => grade.code === formData.grade)
+                )
+                .map(pos => ({ code: pos.code, name: pos.name }));
+        }
+
+        setAvailablePositions(finalPositions);
+
+        // Если текущая позиция не входит в доступные, сбрасываем её
+        if (formData.position && !finalPositions.some(pos => pos.code === formData.position)) {
+            setFormData(prev => ({ ...prev, position: '' }));
+        }
+    }, [formData.department, formData.grade, companyStructure]);
+
+    // Фильтруем грейды в зависимости от выбранного отдела и позиции
+    useEffect(() => {
+        if (!companyStructure || !companyStructure.grades) {
+            setAvailableGrades([]);
+            return;
+        }
+
+        // Используем утилиту для получения отфильтрованных грейдов
+        const filteredGrades = getFilteredGrades(
+            companyStructure,
+            formData.department || '',
+            formData.position || '',
+            []
+        );
+
+        // Преобразуем в формат для отображения
+        const displayGrades = filteredGrades.map(g => ({ value: g.code, label: g.name }));
+
+        setAvailableGrades(displayGrades);
+
+        // Если текущий грейд не входит в доступные, сбрасываем его
+        if (formData.grade && !displayGrades.some(g => g.value === formData.grade)) {
+            setFormData(prev => ({ ...prev, grade: undefined }));
+        }
+    }, [formData.department, formData.position, companyStructure]);
 
     // Сбрасываем тип смены, если выбран не сменный график
     useEffect(() => {
@@ -240,7 +272,7 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
 
     // Динамические опции из структуры компании
     const departmentOptions = companyStructure?.data || [];
-    const gradeOptions = companyStructure?.grades.map(g => ({ value: g.code, label: g.name })) || [];
+    const gradeOptions = availableGrades.length > 0 ? availableGrades : (companyStructure?.grades.map(g => ({ value: g.code, label: g.name })) || []);
 
     // Константы для селектов (статические)
     const scheduleTypeOptions = [

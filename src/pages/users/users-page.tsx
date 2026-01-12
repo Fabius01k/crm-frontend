@@ -9,6 +9,7 @@ import { userThunks } from '@store/features/user-slice/user-thunks';
 import { userSliceActions } from '@store/features/user-slice/user-slice';
 import type { FilterState, FindUsersDto } from '@store/features/user-slice/user-types';
 import { useNavigate } from 'react-router';
+import { getFilteredPositions, getFilteredGrades, getDepartments, getAllGrades } from '../../common/utils/company-structure-filters';
 
 // Локальные константы для графиков и смен (статические, не из API)
 const WORK_SCHEDULE = {
@@ -178,7 +179,7 @@ export const UsersPage = () => {
         // Отделы: из структуры компании, если она загружена, иначе из пользователей
         let departments: Array<{ code: string; name: string }> = [];
         if (companyStructure && companyStructure.data.length > 0) {
-            departments = companyStructure.data.map(dept => ({ code: dept.code, name: dept.name }));
+            departments = getDepartments(companyStructure);
         } else {
             departments = Array.from(new Set(filtered.map(user => user.department)))
                 .filter(dept => dept)
@@ -188,35 +189,7 @@ export const UsersPage = () => {
         // Позиции: если выбран отдел, берем позиции из этого отдела, иначе все уникальные позиции из всех отделов
         let positions: Array<{ code: string; name: string }> = [];
         if (companyStructure && companyStructure.data.length > 0) {
-            if (filters.department) {
-                // Найти отдел по коду
-                const selectedDept = companyStructure.data.find(dept => dept.code === filters.department);
-                if (selectedDept) {
-                    positions = selectedDept.positions.map(pos => ({ code: pos.code, name: pos.name }));
-                } else {
-                    // Если отдел не найден в структуре, fallback к позициям из пользователей
-                    positions = Array.from(new Set(
-                        filtered
-                            .filter(user => user.department === filters.department)
-                            .map(user => user.position)
-                    ))
-                    .filter(pos => pos)
-                    .map(pos => ({ code: pos, name: pos }));
-                }
-            } else {
-                // Все уникальные позиции из всех отделов без повторений
-                const allPositions = companyStructure.data.flatMap(dept =>
-                    dept.positions.map(pos => ({ code: pos.code, name: pos.name }))
-                );
-                // Убираем дубликаты по коду
-                const uniquePositions = allPositions.reduce((acc, pos) => {
-                    if (!acc.some(p => p.code === pos.code)) {
-                        acc.push(pos);
-                    }
-                    return acc;
-                }, [] as Array<{ code: string; name: string }>);
-                positions = uniquePositions;
-            }
+            positions = getFilteredPositions(companyStructure, filters.department, []);
         } else {
             // Fallback к старой логике, если структура компании не загружена
             let positionsFiltered = filtered;
@@ -231,12 +204,12 @@ export const UsersPage = () => {
                 .map(pos => ({ code: pos, name: pos }));
         }
 
-        // Грейды: используем плоский список из companyStructure.grades, фильтруем по отделу и позиции
+        // Грейды: используем иерархическую фильтрацию по отделу и позиции
         let grades: string[] = [];
-        if (companyStructure && companyStructure.grades.length > 0) {
-            // Если выбран отдел, берем грейды из этого отдела (если они есть в данных отдела)
-            // В новом формате грейды не привязаны к отделам, поэтому показываем все грейды
-            grades = companyStructure.grades.map(g => g.code);
+        if (companyStructure && companyStructure.data.length > 0) {
+            // Используем утилиту для получения отфильтрованных грейдов
+            const filteredGrades = getFilteredGrades(companyStructure, filters.department, filters.position, []);
+            grades = filteredGrades.map(g => g.code);
         } else {
             // Fallback к старой логике (из пользователей)
             let gradesFiltered = filtered;
