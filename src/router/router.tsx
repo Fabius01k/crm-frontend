@@ -6,7 +6,6 @@ import { ProfilePage } from "@/pages/profile/profile-page";
 import { UserProfilePage } from "@/pages/user-profile/user-profile-page";
 import { Layout } from "@/pages/layout/layout";
 import { ProtectedRoute } from "./protectedRoute";
-import { AuthRoute } from "./auth-route";
 
 // Для GitHub Pages используем HashRouter, чтобы избежать проблем с 404
 const isGitHubPages = import.meta.env.PROD && window.location.hostname.includes('github.io');
@@ -14,11 +13,7 @@ const isGitHubPages = import.meta.env.PROD && window.location.hostname.includes(
 const routerConfig = [
   {
     path: PATHS.auth,
-    element: (
-      <AuthRoute>
-        <AuthPage />
-      </AuthRoute>
-    )
+    element: <AuthPage />
   },
   {
     path: PATHS.root,

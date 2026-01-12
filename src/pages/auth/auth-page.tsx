@@ -1,32 +1,34 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { useNavigate } from "react-router"
 import type { AppDispatch, RootState } from "@store/store"
 import { authThunks } from "@store/features/auth-slice/auth-thunks"
 import { authSliceActions } from "@store/features/auth-slice/auth-slice"
 import authImage from "@assets/images/auth/auth-image-2.png"
 import PasswordInput from "@/components/password-input/PasswordInput"
-
 import styles from "./auth-page.module.scss"
+import { PATHS } from "@/router/paths"
+import { LOCAL_STORAGE_ACCESS_TOKEN } from "@/constants/constants"
 
 const AuthPage = () => {
     const dispatch = useDispatch<AppDispatch>()
+    const navigate = useNavigate()
+
     const { loading, error } = useSelector((state: RootState) => state.auth)
-
-    // const userId = useSelector((state: RootState) => state.auth.user.id)
-    // const username = useSelector((state: RootState) => state.auth.user.name)
-    // const role = useSelector((state: RootState) => state.auth.user.role)
-    // console.log('userId=', userId, 'username=', username);
-    // console.log("role=", role);
-    
-    
-
 
     const [email, setEmail] = React.useState("")
     const [password, setPassword] = React.useState("")
-    // const [rememberMe, setRememberMe] = React.useState(true)
 
     const isFormFilled = email.trim() !== "" && password.trim() !== ""
     const hasServerError = error !== null
+
+    useEffect(() => {
+        const token = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN)
+        if (token && !loading && !error) {
+            navigate(PATHS.root, { replace: true })
+        }
+    }, [loading, error, navigate])
+
 
     // Очищаем ошибку при изменении полей
     React.useEffect(() => {
@@ -62,9 +64,9 @@ const AuthPage = () => {
 
     return (
         <div className={styles.container}>
-            <div className={styles.imageContainer}>
+            {/* <div className={styles.imageContainer}>
                 <img alt="" src={authImage} />
-            </div>
+            </div> */}
             <form className={styles.authForm} onSubmit={handleSubmit}>
                 <h2>Авторизация</h2>
 

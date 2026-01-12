@@ -3,6 +3,7 @@ import type { AxiosError } from 'axios';
 import { authAPI } from "./auth-api.ts";
 import { LOCAL_STORAGE_ACCESS_TOKEN, LOCAL_STORAGE_REFRESH_TOKEN } from "@constants/constants";
 import type { LoginCredentials, LoginResponse } from "./auth-types.ts";
+// import { userThunks } from '../user-slice/user-thunks';
 
 export const authThunks = {
 
@@ -18,6 +19,8 @@ export const authThunks = {
         async (credentials, thunkAPI) => {
             try {
                 const response = await authAPI.login(credentials);
+                // После успешного логина запрашиваем профиль пользователя для обновления userId
+                // thunkAPI.dispatch(userThunks.fetchCurrentUserProfile());
                 return response.data; // Это значение станет payload для fulfilled action
             } catch (error) {
                 const axiosError = error as AxiosError<{ message?: string; error?: string; statusCode?: number }>;

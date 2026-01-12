@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from '@store/store';
 import { userThunks } from '@store/features/user-slice/user-thunks';
 import type { CreateUserDto } from '@store/features/user-slice/user-types';
 import styles from './CreateUserModal.module.scss';
-import { getFilteredPositions, getFilteredGrades, getDepartments, getAllGrades, findPositionByCode } from '../../common/utils/company-structure-filters';
+import { getFilteredPositions, getFilteredGrades } from '../../common/utils/company-structure-filters';
 
 import createPassImage from '@assets/icons/create-password/create-pass-image.png';
 

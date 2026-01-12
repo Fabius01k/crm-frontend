@@ -9,7 +9,7 @@ import { userThunks } from '@store/features/user-slice/user-thunks';
 import { userSliceActions } from '@store/features/user-slice/user-slice';
 import type { FilterState, FindUsersDto } from '@store/features/user-slice/user-types';
 import { useNavigate } from 'react-router';
-import { getFilteredPositions, getFilteredGrades, getDepartments, getAllGrades } from '../../common/utils/company-structure-filters';
+import { getFilteredPositions, getFilteredGrades, getDepartments } from '../../common/utils/company-structure-filters';
 
 // Локальные константы для графиков и смен (статические, не из API)
 const WORK_SCHEDULE = {
@@ -328,7 +328,7 @@ export const UsersPage = () => {
     if (loading) {
         return (
             <div className={styles.container}>
-                <Preloader variant="fullscreen" text="Загрузка пользователей..." />
+                <Preloader variant="fullscreen" text="Загрузка данных..." />
             </div>
         );
     }

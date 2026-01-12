@@ -1,4 +1,4 @@
-import type { CompanyStructureResponse, CompanyStructureDepartment, CompanyStructurePosition, GradeItem } from '@store/features/user-slice/user-types';
+import type { CompanyStructureResponse, CompanyStructureDepartment, CompanyStructurePosition } from '@store/features/user-slice/user-types';
 
 /**
  * Получить позиции на основе структуры компании и выбранного отдела
