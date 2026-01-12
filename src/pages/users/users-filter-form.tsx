@@ -3,6 +3,7 @@ import arrowIcon from '@assets/icons/arrow.svg';
 import styles from './users-page.module.scss';
 import type { FilterState, CompanyStructureResponse } from '@store/features/user-slice/user-types';
 import { getFilteredPositions, getFilteredGrades } from '../../common/utils/company-structure-filters';
+import { WorkScheduleEnum } from '../../common/enums/enums';
 
 interface UsersFilterFormProps {
     onApplyFilters: (filters: FilterState) => void;
@@ -47,12 +48,6 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
         shiftTypes = [{ value: '', label: 'Все' }]
     } = availableOptions || {};
 
-    // Локальная константа для типа графика (можно вынести в общий файл, но пока здесь)
-    const WORK_SCHEDULE = {
-        DEFAULT: 'default',
-        SHIFT_SCHEDULE: 'shift_schedule',
-    } as const;
-
     // Вычисляем позиции на основе структуры компании и выбранного отдела
     const computedPositions = useMemo(() => {
         return getFilteredPositions(companyStructure, filters.department, positions);
@@ -63,7 +58,7 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
         return getFilteredGrades(companyStructure, filters.department, filters.position, grades);
     }, [companyStructure, filters.department, filters.position, grades]);
 
-    const showShiftType = filters.scheduleType === WORK_SCHEDULE.SHIFT_SCHEDULE;
+    const showShiftType = filters.scheduleType === WorkScheduleEnum.SHIFT_SCHEDULE;
 
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -86,7 +81,7 @@ export const UsersFilterForm = ({ onApplyFilters, onResetFilters, currentFilters
                 newFilters.grade = '';
             }
             // Если изменился тип графика и выбран не сменный график, сбрасываем тип смены
-            if (name === 'scheduleType' && value !== WORK_SCHEDULE.SHIFT_SCHEDULE) {
+            if (name === 'scheduleType' && value !== WorkScheduleEnum.SHIFT_SCHEDULE) {
                 newFilters.shiftType = '';
             }
 

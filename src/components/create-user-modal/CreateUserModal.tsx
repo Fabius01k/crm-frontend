@@ -5,46 +5,15 @@ import { userThunks } from '@store/features/user-slice/user-thunks';
 import type { CreateUserDto } from '@store/features/user-slice/user-types';
 import styles from './CreateUserModal.module.scss';
 import { getFilteredPositions, getFilteredGrades } from '../../common/utils/company-structure-filters';
-
-import createPassImage from '@assets/icons/create-password/create-pass-image.png';
-
-// Константы для статических значений (ранее были в enums.ts)
-const WORK_SCHEDULE = {
-  DEFAULT: 'default',
-  SHIFT_SCHEDULE: 'shift_schedule',
-} as const;
-
-const SHIFT_PREFERENCE = {
-  MORNING: 'morning',
-  DAY: 'day',
-  NIGHT: 'night',
-  MIXED: 'mixed',
-} as const;
-
-const USER_ROLE = {
-  EMPLOYEE: 'EMPLOYEE',
-  TEAMLEAD: 'TEAMLEAD',
-  INTERN: 'INTERN',
-} as const;
-
-// Метки для отображения
-const WORK_SCHEDULE_LABELS: Record<string, string> = {
-  [WORK_SCHEDULE.DEFAULT]: 'Стандартный',
-  [WORK_SCHEDULE.SHIFT_SCHEDULE]: 'Сменный',
-};
-
-const SHIFT_PREFERENCE_LABELS: Record<string, string> = {
-  [SHIFT_PREFERENCE.MORNING]: 'Утренняя',
-  [SHIFT_PREFERENCE.DAY]: 'Дневная',
-  [SHIFT_PREFERENCE.NIGHT]: 'Ночная',
-  [SHIFT_PREFERENCE.MIXED]: 'Любая',
-};
-
-const USER_ROLE_LABELS: Record<string, string> = {
-  [USER_ROLE.EMPLOYEE]: 'Сотрудник',
-  [USER_ROLE.TEAMLEAD]: 'Тимлид',
-  [USER_ROLE.INTERN]: 'Стажёр',
-};
+import {
+  WorkScheduleEnum,
+  ShiftPreferenceEnum,
+  UserRoleEnum,
+  WorkScheduleLabels,
+  ShiftPreferenceLabels,
+  UserRoleLabels,
+} from '../../common/enums/enums';
+import PasswordInputWithGeneration from '../password-input/PasswordInputWithGeneration';
 
 interface CreateUserModalProps {
     isOpen: boolean;
@@ -140,7 +109,7 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
 
     // Сбрасываем тип смены, если выбран не сменный график
     useEffect(() => {
-        if (formData.workSchedule !== WORK_SCHEDULE.SHIFT_SCHEDULE && formData.shiftPreference) {
+        if (formData.workSchedule !== WorkScheduleEnum.SHIFT_SCHEDULE && formData.shiftPreference) {
             setFormData(prev => ({ ...prev, shiftPreference: undefined }));
         }
     }, [formData.workSchedule]);
@@ -170,7 +139,7 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
         if (!formData.grade) newErrors.grade = 'Грейд обязателен';
         if (!formData.workSchedule) newErrors.workSchedule = 'Тип графика обязателен';
         
-        if (formData.workSchedule === WORK_SCHEDULE.SHIFT_SCHEDULE && !formData.shiftPreference) {
+        if (formData.workSchedule === WorkScheduleEnum.SHIFT_SCHEDULE && !formData.shiftPreference) {
             newErrors.shiftPreference = 'Тип смены обязателен для сменного графика';
         }
 
@@ -178,37 +147,6 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
         return Object.keys(newErrors).length === 0;
     };
 
-    const generateStrongPassword = () => {
-        const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const digits = '0123456789';
-        const allChars = lowercase + uppercase + digits;
-        
-        let password = '';
-        // Гарантируем наличие хотя бы одного символа каждого типа
-        password += lowercase[Math.floor(Math.random() * lowercase.length)];
-        password += uppercase[Math.floor(Math.random() * uppercase.length)];
-        password += digits[Math.floor(Math.random() * digits.length)];
-        
-        // Дополняем до 12 символов случайными символами из всех категорий
-        for (let i = 0; i < 9; i++) {
-            password += allChars[Math.floor(Math.random() * allChars.length)];
-        }
-        
-        // Перемешиваем символы
-        password = password.split('').sort(() => Math.random() - 0.5).join('');
-        
-        return password;
-    };
-
-    const handleGeneratePassword = () => {
-        const newPassword = generateStrongPassword();
-        setFormData(prev => ({ ...prev, password: newPassword }));
-        // Очищаем ошибку пароля, если она была
-        if (errors.password) {
-            setErrors(prev => ({ ...prev, password: '' }));
-        }
-    };
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -276,19 +214,19 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
 
     // Константы для селектов (статические)
     const scheduleTypeOptions = [
-        { value: WORK_SCHEDULE.DEFAULT, label: WORK_SCHEDULE_LABELS[WORK_SCHEDULE.DEFAULT] },
-        { value: WORK_SCHEDULE.SHIFT_SCHEDULE, label: WORK_SCHEDULE_LABELS[WORK_SCHEDULE.SHIFT_SCHEDULE] },
+        { value: WorkScheduleEnum.DEFAULT, label: WorkScheduleLabels[WorkScheduleEnum.DEFAULT] },
+        { value: WorkScheduleEnum.SHIFT_SCHEDULE, label: WorkScheduleLabels[WorkScheduleEnum.SHIFT_SCHEDULE] },
     ];
     const shiftTypeOptions = [
-        { value: SHIFT_PREFERENCE.MORNING, label: SHIFT_PREFERENCE_LABELS[SHIFT_PREFERENCE.MORNING] },
-        { value: SHIFT_PREFERENCE.DAY, label: SHIFT_PREFERENCE_LABELS[SHIFT_PREFERENCE.DAY] },
-        { value: SHIFT_PREFERENCE.NIGHT, label: SHIFT_PREFERENCE_LABELS[SHIFT_PREFERENCE.NIGHT] },
-        { value: SHIFT_PREFERENCE.MIXED, label: SHIFT_PREFERENCE_LABELS[SHIFT_PREFERENCE.MIXED] },
+        { value: ShiftPreferenceEnum.MORNING, label: ShiftPreferenceLabels[ShiftPreferenceEnum.MORNING] },
+        { value: ShiftPreferenceEnum.DAY, label: ShiftPreferenceLabels[ShiftPreferenceEnum.DAY] },
+        { value: ShiftPreferenceEnum.NIGHT, label: ShiftPreferenceLabels[ShiftPreferenceEnum.NIGHT] },
+        { value: ShiftPreferenceEnum.MIXED, label: ShiftPreferenceLabels[ShiftPreferenceEnum.MIXED] },
     ];
     const roleOptions = [
-        { value: USER_ROLE.EMPLOYEE, label: USER_ROLE_LABELS[USER_ROLE.EMPLOYEE] },
-        { value: USER_ROLE.TEAMLEAD, label: USER_ROLE_LABELS[USER_ROLE.TEAMLEAD] },
-        { value: USER_ROLE.INTERN, label: USER_ROLE_LABELS[USER_ROLE.INTERN] },
+        { value: UserRoleEnum.EMPLOYEE, label: UserRoleLabels[UserRoleEnum.EMPLOYEE] },
+        { value: UserRoleEnum.TEAMLEAD, label: UserRoleLabels[UserRoleEnum.TEAMLEAD] },
+        { value: UserRoleEnum.INTERN, label: UserRoleLabels[UserRoleEnum.INTERN] },
     ];
 
     return (
@@ -472,7 +410,7 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                                 value={formData.shiftPreference}
                                 onChange={handleInputChange}
                                 className={errors.shiftPreference ? styles.inputError : ''}
-                                disabled={formData.workSchedule !== WORK_SCHEDULE.SHIFT_SCHEDULE}
+                                disabled={formData.workSchedule !== WorkScheduleEnum.SHIFT_SCHEDULE}
                             >
                                 <option value="">Выберите тип смены</option>
                                 {shiftTypeOptions.map((option) => (
@@ -482,7 +420,7 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                                 ))}
                             </select>
                             {errors.shiftPreference && <span className={styles.errorText}>{errors.shiftPreference}</span>}
-                            {formData.workSchedule !== WORK_SCHEDULE.SHIFT_SCHEDULE && (
+                            {formData.workSchedule !== WorkScheduleEnum.SHIFT_SCHEDULE && (
                                 <div className={styles.hint}>Доступно только для сменного графика</div>
                             )}
                         </div>
@@ -492,27 +430,15 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
                         <h4 className={styles.sectionTitle}>Другое</h4>
                         <div className={styles.formGroup}>
                             <label htmlFor="password">Пароль *</label>
-                            <div className={styles.passwordInputWrapper}>
-                                <input
-                                    // type="password"
-                                    type="text"
-                                    id="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleInputChange}
-                                    className={errors.password ? styles.inputError : ''}
-                                    placeholder="Введите пароль"
-                                />
-                                <button
-                                    type="button"
-                                    className={styles.generatePasswordButton}
-                                    onClick={handleGeneratePassword}
-                                    title="Сгенерировать надежный пароль"
-                                >
-                                    <img alt="" src={createPassImage} />
-                                </button>
-                            </div>
-                            {errors.password && <span className={styles.errorText}>{errors.password}</span>}
+                            <PasswordInputWithGeneration
+                                id="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                placeholder="Введите пароль"
+                                error={errors.password}
+                                required
+                            />
                         </div>
 
                         <div className={`${styles.formGroup} ${styles.narrowFormGroup}`}>

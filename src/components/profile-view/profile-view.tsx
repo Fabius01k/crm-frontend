@@ -1,36 +1,13 @@
 import { type ChangeEvent } from 'react';
 import styles from './profile-view.module.scss';
 import type { CompanyStructureResponse } from '@store/features/user-slice/user-types';
-
-// Локальные константы для графиков и смен (статические, не из API)
-const WORK_SCHEDULE = {
-  DEFAULT: 'default',
-  SHIFT_SCHEDULE: 'shift_schedule',
-} as const;
-
-const SHIFT_PREFERENCE = {
-  MORNING: 'morning',
-  DAY: 'day',
-  NIGHT: 'night',
-  MIXED: 'mixed',
-} as const;
-
-const WORK_SCHEDULE_LABELS: Record<string, string> = {
-  [WORK_SCHEDULE.DEFAULT]: 'Стандартный',
-  [WORK_SCHEDULE.SHIFT_SCHEDULE]: 'Сменный',
-};
-
-const SHIFT_PREFERENCE_LABELS: Record<string, string> = {
-  [SHIFT_PREFERENCE.MORNING]: 'Утренняя',
-  [SHIFT_PREFERENCE.DAY]: 'Дневная',
-  [SHIFT_PREFERENCE.NIGHT]: 'Ночная',
-  [SHIFT_PREFERENCE.MIXED]: 'Любая',
-};
-
-// Вспомогательная функция для получения русскоязычного названия
-function getLabel(value: string, labels: Record<string, string>): string {
-  return labels[value] || value;
-}
+import {
+//   WorkScheduleEnum,
+  ShiftPreferenceEnum,
+  WorkScheduleLabels,
+  ShiftPreferenceLabels,
+  getLabel,
+} from '../../common/enums/enums';
 
 // Импортируем аватары из оригинального файла
 import ava1 from "@assets/images/profile/ava-1.png"
@@ -135,11 +112,11 @@ export const ProfileView = ({
     };
 
     const getShiftTypeLabel = (code: string): string => {
-        return getLabel(code, SHIFT_PREFERENCE_LABELS);
+        return getLabel(code, ShiftPreferenceLabels);
     };
 
     const getWorkScheduleLabel = (code: string): string => {
-        return getLabel(code, WORK_SCHEDULE_LABELS);
+        return getLabel(code, WorkScheduleLabels);
     };
 
     const handleBlockToggle = () => {
@@ -322,7 +299,7 @@ export const ProfileView = ({
                                     <label>Тип графика</label>
                                     <select name="workSchedule" value={formData.workSchedule} onChange={onInputChange}>
                                         <option value="">Выберите тип графика</option>
-                                        {Object.entries(WORK_SCHEDULE_LABELS).map(([key, label]) => (
+                                        {Object.entries(WorkScheduleLabels).map(([key, label]) => (
                                             <option key={key} value={key}>
                                                 {label}
                                             </option>
@@ -333,9 +310,9 @@ export const ProfileView = ({
                                     <label>Предпочтительный тип смены</label>
                                     <select name="preferredShiftType" value={formData.preferredShiftType} onChange={onInputChange}>
                                         <option value="">Выберите тип смены</option>
-                                        {Object.entries(SHIFT_PREFERENCE).map(([_, value]) => (
+                                        {Object.entries(ShiftPreferenceEnum).map(([_, value]) => (
                                             <option key={value} value={value}>
-                                                {getLabel(value, SHIFT_PREFERENCE_LABELS)}
+                                                {getLabel(value, ShiftPreferenceLabels)}
                                             </option>
                                         ))}
                                     </select>

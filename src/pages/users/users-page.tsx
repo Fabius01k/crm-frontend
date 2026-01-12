@@ -10,36 +10,13 @@ import { userSliceActions } from '@store/features/user-slice/user-slice';
 import type { FilterState, FindUsersDto } from '@store/features/user-slice/user-types';
 import { useNavigate } from 'react-router';
 import { getFilteredPositions, getFilteredGrades, getDepartments } from '../../common/utils/company-structure-filters';
-
-// Локальные константы для графиков и смен (статические, не из API)
-const WORK_SCHEDULE = {
-  DEFAULT: 'default',
-  SHIFT_SCHEDULE: 'shift_schedule',
-} as const;
-
-const SHIFT_PREFERENCE = {
-  MORNING: 'morning',
-  DAY: 'day',
-  NIGHT: 'night',
-  MIXED: 'mixed',
-} as const;
-
-const WORK_SCHEDULE_LABELS: Record<string, string> = {
-  [WORK_SCHEDULE.DEFAULT]: 'Стандартный',
-  [WORK_SCHEDULE.SHIFT_SCHEDULE]: 'Сменный',
-};
-
-const SHIFT_PREFERENCE_LABELS: Record<string, string> = {
-  [SHIFT_PREFERENCE.MORNING]: 'Утренняя',
-  [SHIFT_PREFERENCE.DAY]: 'Дневная',
-  [SHIFT_PREFERENCE.NIGHT]: 'Ночная',
-  [SHIFT_PREFERENCE.MIXED]: 'Любая',
-};
-
-// Вспомогательная функция для получения русскоязычного названия
-function getLabel(value: string, labels: Record<string, string>): string {
-  return labels[value] || value;
-}
+import {
+//   WorkScheduleEnum,
+//   ShiftPreferenceEnum,
+  WorkScheduleLabels,
+  ShiftPreferenceLabels,
+  getLabel,
+} from '../../common/enums/enums';
 
 // Вспомогательная функция для преобразования FilterState в FindUsersDto
 const convertFiltersToFindUsersDto = (filters: FilterState): FindUsersDto => {
@@ -148,10 +125,10 @@ export const UsersPage = () => {
             const departmentName = user.department ? departmentMap.get(user.department) || user.department : '';
             const positionName = user.position ? positionMap.get(user.position) || user.position : '';
             const gradeName = user.grade ? gradeMap.get(user.grade) || user.grade : '';
-            const shiftTypeLabel = user.shiftPreference ? getLabel(user.shiftPreference, SHIFT_PREFERENCE_LABELS) : '';
+            const shiftTypeLabel = user.shiftPreference ? getLabel(user.shiftPreference, ShiftPreferenceLabels) : '';
             // Отладочный вывод
             if (user.shiftPreference && !shiftTypeLabel) {
-                console.warn('Не найден label для shiftPreference:', user.shiftPreference, SHIFT_PREFERENCE_LABELS);
+                console.warn('Не найден label для shiftPreference:', user.shiftPreference, ShiftPreferenceLabels);
             }
             return {
                 id: user.id,
@@ -166,7 +143,7 @@ export const UsersPage = () => {
                 shiftType: user.shiftPreference || '',
                 // Метки для отображения
                 gradeLabel: gradeName,
-                scheduleTypeLabel: user.workSchedule ? getLabel(user.workSchedule, WORK_SCHEDULE_LABELS) : '',
+                scheduleTypeLabel: user.workSchedule ? getLabel(user.workSchedule, WorkScheduleLabels) : '',
                 shiftTypeLabel,
             };
         });
@@ -246,11 +223,11 @@ export const UsersPage = () => {
             })),
             scheduleTypes: scheduleTypeValues.map(value => ({
                 value,
-                label: value ? getLabel(value, WORK_SCHEDULE_LABELS) : 'Все',
+                label: value ? getLabel(value, WorkScheduleLabels) : 'Все',
             })),
             shiftTypes: shiftTypeValues.map(value => ({
                 value,
-                label: value ? getLabel(value, SHIFT_PREFERENCE_LABELS) : 'Все',
+                label: value ? getLabel(value, ShiftPreferenceLabels) : 'Все',
             })),
         };
     }, [filters, transformedUsers, companyStructure]);
