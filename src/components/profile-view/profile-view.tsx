@@ -1,4 +1,5 @@
-import { type ChangeEvent } from 'react';
+import { type ChangeEvent, useState } from 'react';
+import { useAppDispatch } from '@store/store';
 import styles from './profile-view.module.scss';
 import type { CompanyStructureResponse } from '@store/features/user-slice/user-types';
 import {
@@ -8,6 +9,8 @@ import {
   ShiftPreferenceLabels,
   getLabel,
 } from '../../common/enums/enums';
+import { ChangePasswordModal } from './ChangePasswordModal';
+import { userThunks } from '@store/features/user-slice/user-thunks';
 
 // Импортируем аватары из оригинального файла
 import ava1 from "@assets/images/profile/ava-1.png"
@@ -44,7 +47,7 @@ export interface ProfileViewProps {
     user: ProfileUser;
     // Режим редактирования
     isEditing: boolean;
-    // Данные формы при редактировании
+    // Данные формы при редактирования
     formData: ProfileUser;
     // Структура компании для нормализации названий отделов и позиций
     companyStructure?: CompanyStructureResponse | null;
@@ -82,6 +85,11 @@ export const ProfileView = ({
     isAvatarModalOpen,
     onAvatarModalClose
 }: ProfileViewProps) => {
+    const dispatch = useAppDispatch();
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [passwordChangeError, setPasswordChangeError] = useState<string>('');
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+
     const isBlocked = false;
     const blockedLable: string = !isBlocked ? 'Заблокировать профиль' : 'Разблокировать профиль';
 
@@ -123,6 +131,56 @@ export const ProfileView = ({
         if (onBlockUser) {
             onBlockUser(!isBlocked);
         }
+    };
+
+    const onPasswordChangeHandler = () => {
+        setPasswordChangeError('');
+        setIsPasswordModalOpen(true);
+    };
+
+    const handlePasswordChange = async (data: {
+        oldPassword?: string;
+        newPassword: string;
+        userId?: string;
+    }) => {
+        setIsChangingPassword(true);
+        setPasswordChangeError('');
+
+        try {
+            if (isOwnProfile) {
+                // Смена собственного пароля
+                if (!data.oldPassword) {
+                    throw new Error('Текущий пароль обязателен');
+                }
+                await dispatch(userThunks.changeOwnPassword({
+                    oldPassword: data.oldPassword,
+                    newPassword: data.newPassword
+                })).unwrap();
+            } else {
+                // Смена пароля другого пользователя
+                // TODO: Нужно получить userId из пропсов или URL
+                // Пока используем заглушку с сообщением
+                throw new Error('Функция смены пароля другого пользователя требует реализации получения userId');
+                // await dispatch(userThunks.changeUserPassword({
+                //     id: data.userId!, // userId должен быть передан
+                //     data: { newPassword: data.newPassword }
+                // })).unwrap();
+            }
+            
+            // Закрываем модальное окно после успеха
+            setIsPasswordModalOpen(false);
+            // Можно показать уведомление об успехе
+            alert('Пароль успешно изменен');
+        } catch (error: any) {
+            setPasswordChangeError(error.message || 'Ошибка при смене пароля');
+        } finally {
+            setIsChangingPassword(false);
+        }
+    };
+
+    const closePasswordModal = () => {
+        setIsPasswordModalOpen(false);
+        setPasswordChangeError('');
     };
 
     console.log('onAvatarClick=', onAvatarClick);
@@ -241,12 +299,12 @@ export const ProfileView = ({
                             </div>
                         )}
 
-                        {isEditing && (
+                        {isEditing && currentUserRole === 'teamlead' && (
                             <div className={styles.subActions}>
-                                <button className={styles.editButton} onClick={() => {}}>Изменить пароль</button>
-                                {!isOwnProfile && (
-                                    <button className={styles.blockButton} onClick={handleBlockToggle}>{blockedLable}</button>
-                                )}
+                                <button className={styles.editButton} onClick={onPasswordChangeHandler}>
+                                    {isOwnProfile ? 'Изменить мой пароль' : 'Изменить пароль сотруднику'}
+                                </button>
+                                <button className={styles.blockButton} onClick={handleBlockToggle}>{blockedLable}</button>
                             </div>
                         )}
                         <div className={styles.exitBtn}>
@@ -372,8 +430,8 @@ export const ProfileView = ({
                         <h3>Выберите аватар</h3>
                         <div className={styles.avatarGrid}>
                             {AVAILABLE_AVATARS.map((avatar, index) => (
-                                <div 
-                                    key={index} 
+                                <div
+                                    key={index}
                                     className={`${styles.avatarOption} ${formData.avatar === avatar ? styles.selected : ''}`}
                                     onClick={() => onAvatarSelect(avatar)}
                                 >
@@ -384,6 +442,19 @@ export const ProfileView = ({
                         <button className={styles.closeButton} onClick={onAvatarModalClose}>Закрыть</button>
                     </div>
                 </div>
+            )}
+
+            {isPasswordModalOpen && (
+                <ChangePasswordModal
+                    userId={user.email} // Временное решение, нужно использовать ID пользователя
+                    userEmail={user.email}
+                    userName={`${user.surname} ${user.name}`}
+                    isOwnProfile={isOwnProfile}
+                    onClose={closePasswordModal}
+                    onSubmit={handlePasswordChange}
+                    isLoading={isChangingPassword}
+                    error={passwordChangeError}
+                />
             )}
         </div>
     );
