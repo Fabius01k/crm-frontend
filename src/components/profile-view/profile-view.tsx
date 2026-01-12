@@ -39,7 +39,7 @@ import ava3 from "@assets/images/profile/ava-3.png"
 import ava4 from "@assets/images/profile/ava-4.png"
 import ava5 from "@assets/images/profile/ava-5.png"
 import ava6 from "@assets/images/profile/ava-6.png"
-import workImage from "@assets/images/profile/image.png"
+// import workImage from "@assets/images/profile/image.png"
 
 const AVAILABLE_AVATARS = [ava1, ava2, ava3, ava4, ava5, ava6];
 
@@ -93,7 +93,7 @@ export const ProfileView = ({
     isEditing,
     formData,
     companyStructure,
-    // isOwnProfile = false,
+    isOwnProfile = false,
     currentUserRole,
     onInputChange,
     onSave,
@@ -149,14 +149,11 @@ export const ProfileView = ({
     };
 
     console.log('onAvatarClick=', onAvatarClick);
-
-    console.log('formData=', formData);
     
     
     // Определяем, нужно ли показывать кнопки редактирования и блокировки
     // const shouldShowActionButtons = !isOwnProfile || currentUserRole === 'TEAMLEAD';
-    const shouldShowActionButtons = currentUserRole === 'TEAMLEAD';
-    console.log('currentUserRole=', currentUserRole);
+    const shouldShowActionButtons = currentUserRole === 'teamlead';
     
 
     return (
@@ -177,7 +174,7 @@ export const ProfileView = ({
                     ) : shouldShowActionButtons ? (
                         <>
                             <button className={styles.editButton} onClick={onEditToggle}>Редактировать профиль</button>
-                            <button className={styles.blockButton} onClick={handleBlockToggle}>{blockedLable}</button>
+                            {/* <button className={styles.blockButton} onClick={handleBlockToggle}>{blockedLable}</button> */}
                         </>
                     ) : null}
                 </div>
@@ -266,6 +263,18 @@ export const ProfileView = ({
                                 </div>
                             </div>
                         )}
+
+                        {isEditing && (
+                            <div className={styles.subActions}>
+                                <button className={styles.editButton} onClick={() => {}}>Изменить пароль</button>
+                                {!isOwnProfile && (
+                                    <button className={styles.blockButton} onClick={handleBlockToggle}>{blockedLable}</button>
+                                )}
+                            </div>
+                        )}
+                        <div className={styles.exitBtn}>
+                            <button className={styles.blockButton} onClick={() => {}}>Выйти из аккаунта</button>
+                        </div>
                     </div>
                 </div>
 
@@ -374,9 +383,9 @@ export const ProfileView = ({
                         )}
                     </div>
 
-                    <div className={styles.workImageContainer}>
+                    {/* <div className={styles.workImageContainer}>
                         <img src={workImage} alt="Work" className={styles.workImage} />
-                    </div>
+                    </div> */}
                 </div>
             </div>
 

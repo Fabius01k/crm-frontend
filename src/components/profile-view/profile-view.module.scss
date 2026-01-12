@@ -172,6 +172,23 @@
     justify-content: flex-end;
 }
 
+.subActions {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    margin-top: 15px;
+}
+
+.exitBtn {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    
+    button {
+        width: 100%;
+    }
+}
+
 .editButton, .saveButton, .cancelButton, .blockButton {
     height: 40px;
     // padding: 10px 24px;
@@ -193,7 +210,8 @@
 }
 
 .saveButton {
-    background: #28a745;
+    // background: #28a745;
+    background: #007bff;
     color: white;
 
     &:hover {
