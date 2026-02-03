@@ -12,18 +12,18 @@
     border-spacing: 0;
     border-radius: 12px;
     overflow: hidden;
-    background-color: #F0F4F7;
-    font-family: 'Inter', sans-serif;
+    background-color: #f0f4f7;
+    font-family: "Inter", sans-serif;
 }
 
 .header {
-    background-color: #B3C9E1;
+    background-color: #b3c9e1;
 }
 
 .headerCell {
     padding: 16px;
     text-align: left;
-    font-family: 'Inter', serif;
+    font-family: "Inter", serif;
     font-weight: 400;
     font-style: normal;
     font-size: 16px;
@@ -42,7 +42,7 @@
 
 .row {
     color: #222222;
-    font-family: 'Inter', serif;
+    font-family: "Inter", serif;
     font-weight: 400;
     font-style: normal;
     font-size: 14.74px;
@@ -51,7 +51,7 @@
     cursor: pointer;
 
     &:nth-child(even) {
-        background-color: #B3C9E11F;
+        background-color: #b3c9e11f;
     }
 
     &:nth-child(odd) {
@@ -59,7 +59,7 @@
     }
 
     &:hover {
-        background-color: #E8EFF7;
+        background-color: #e8eff7;
     }
 }
 
@@ -76,17 +76,18 @@
     flex-wrap: wrap;
     gap: 16px;
     margin-bottom: 16px;
+    align-items: flex-start;
 }
 
 .filterGroup {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    min-width: 150px;
+    min-width: 180px;
+    max-width: 250px;
 }
 
 .filterGroup label {
-    font-family: 'Inter', serif;
+    font-family: "Inter", serif;
     font-weight: 400;
     font-style: normal;
     font-size: 16px;
@@ -103,9 +104,9 @@
 }
 
 .filterSelect {
-    border: 2px solid #B3C9E199;
+    border: 2px solid #b3c9e199;
     border-radius: 8px;
-    font-family: 'Inter', serif;
+    font-family: "Inter", serif;
     font-weight: 400;
     font-style: normal;
     font-size: 16px;
@@ -118,14 +119,15 @@
     cursor: pointer;
     transition: border-color 0.2s;
     width: 100%;
+    box-sizing: border-box;
 
     &:focus {
         outline: none;
-        border-color: #B3C9E1;
+        border-color: #b3c9e1;
     }
 
     &:hover {
-        border-color: #B3C9E1;
+        border-color: #b3c9e1;
     }
 }
 
@@ -151,13 +153,13 @@
 }
 
 .filterButton {
-    font-family: 'Inter', serif;
+    font-family: "Inter", serif;
     font-weight: 400;
     font-style: normal;
     font-size: 19px;
     line-height: 100%;
     letter-spacing: 0;
-    color: #B3C9E1;
+    color: #b3c9e1;
     background: none;
     border: none;
     padding: 12px 24px;
@@ -165,11 +167,11 @@
     transition: color 0.2s;
 
     &:hover {
-        color: #8FA8D1;
+        color: #8fa8d1;
     }
 
     &:active {
-        color: #6C8BC7;
+        color: #6c8bc7;
     }
 }
 
@@ -202,14 +204,14 @@
 .searchInput {
     width: 100%;
     padding: 12px 16px 12px 48px;
-    font-family: 'Inter', serif;
+    font-family: "Inter", serif;
     font-weight: 400;
     font-style: normal;
     font-size: 16px;
     line-height: 100%;
     letter-spacing: 0;
     color: #66666680;
-    background-color: #F0F4F7;
+    background-color: #f0f4f7;
     border: none;
     border-radius: 50px;
     outline: none;
@@ -220,7 +222,7 @@
     }
 
     &:focus {
-        background-color: #E4EAF1;
+        background-color: #e4eaf1;
     }
 }
 .pagination {
@@ -233,22 +235,22 @@
 }
 
 .paginationButton {
-    font-family: 'Inter', serif;
+    font-family: "Inter", serif;
     font-weight: 400;
     font-style: normal;
     font-size: 16px;
     line-height: 100%;
     letter-spacing: 0;
-    color: #B3C9E1;
+    color: #b3c9e1;
     background: none;
-    border: 2px solid #B3C9E1;
+    border: 2px solid #b3c9e1;
     border-radius: 8px;
     padding: 8px 16px;
     cursor: pointer;
     transition: all 0.2s;
 
     &:hover:not(:disabled) {
-        background-color: #B3C9E1;
+        background-color: #b3c9e1;
         color: white;
     }
 
@@ -261,7 +263,7 @@
 }
 
 .paginationInfo {
-    font-family: 'Inter', serif;
+    font-family: "Inter", serif;
     font-weight: 400;
     font-style: normal;
     font-size: 16px;
@@ -285,7 +287,7 @@
 }
 
 .userCount {
-    font-family: 'Inter', serif;
+    font-family: "Inter", serif;
     font-weight: 400;
     font-size: 16px;
     line-height: 100%;
@@ -294,15 +296,15 @@
 }
 
 .addButton {
-    font-family: 'Inter', serif;
+    font-family: "Inter", serif;
     font-weight: 400;
     font-style: normal;
     font-size: 16px;
     line-height: 100%;
     letter-spacing: 0;
     color: white;
-    background-color: #B3C9E1;
-    border: 2px solid #B3C9E1;
+    background-color: #b3c9e1;
+    border: 2px solid #b3c9e1;
     border-radius: 8px;
     padding: 12px 24px;
     cursor: pointer;
@@ -312,13 +314,13 @@
     gap: 8px;
 
     &:hover:not(:disabled) {
-        background-color: #8FA8D1;
-        border-color: #8FA8D1;
+        background-color: #8fa8d1;
+        border-color: #8fa8d1;
     }
 
     &:active:not(:disabled) {
-        background-color: #6C8BC7;
-        border-color: #6C8BC7;
+        background-color: #6c8bc7;
+        border-color: #6c8bc7;
     }
 
     &:disabled {
@@ -327,7 +329,7 @@
     }
 
     &::before {
-        content: '+';
+        content: "+";
         font-size: 20px;
         font-weight: 600;
     }
