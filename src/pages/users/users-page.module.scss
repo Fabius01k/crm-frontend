@@ -159,7 +159,7 @@
     font-size: 19px;
     line-height: 100%;
     letter-spacing: 0;
-    color: #b3c9e1;
+    color: #007bff;
     background: none;
     border: none;
     padding: 12px 24px;
@@ -167,11 +167,11 @@
     transition: color 0.2s;
 
     &:hover {
-        color: #8fa8d1;
+        color: #0056b3;
     }
 
     &:active {
-        color: #6c8bc7;
+        color: #004085;
     }
 }
 
@@ -303,8 +303,8 @@
     line-height: 100%;
     letter-spacing: 0;
     color: white;
-    background-color: #b3c9e1;
-    border: 2px solid #b3c9e1;
+    background-color: #007bff;
+    border: 2px solid #007bff;
     border-radius: 8px;
     padding: 12px 24px;
     cursor: pointer;
@@ -314,13 +314,13 @@
     gap: 8px;
 
     &:hover:not(:disabled) {
-        background-color: #8fa8d1;
-        border-color: #8fa8d1;
+        background-color: #0056b3;
+        border-color: #0056b3;
     }
 
     &:active:not(:disabled) {
-        background-color: #6c8bc7;
-        border-color: #6c8bc7;
+        background-color: #004085;
+        border-color: #004085;
     }
 
     &:disabled {
