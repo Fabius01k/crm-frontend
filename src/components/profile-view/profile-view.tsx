@@ -511,12 +511,14 @@ export const ProfileView = ({
             {/* <button className={styles.blockButton} onClick={handleBlockToggle}>{blockedLable}</button> */}
           </>
         ) : null}
-        <button
-          className={styles.logoutButton}
-          onClick={() => dispatch(authThunks.logoutUser())}
-        >
-          Выйти из аккаунта
-        </button>
+        {isOwnProfile && !isEditing && (
+          <button
+            className={styles.logoutButton}
+            onClick={() => dispatch(authThunks.logoutUser())}
+          >
+            Выйти из аккаунта
+          </button>
+        )}
       </div>
 
       {isAvatarModalOpen && (
